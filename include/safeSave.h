@@ -22,7 +22,6 @@ namespace sfs
 		couldNotMakeBackup,
 		readBackup,
 	};
-
 	
 	const char* getErrorString(Errors e);
 	
