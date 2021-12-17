@@ -3,7 +3,14 @@
 ---
 
 Allows you to save data and don't worry if your save will get corupted. In the program is closed while the file is being saved the library will load the backup.
-If the original file has beed modified by the outside the library will load the backup.
+If the original file has beed modified by the outside the library will load the backup. If both the backup and the original file are corupted the library will 
+report this error.
+
+---
+
+Integration: paste the include/safeSave.h file and the src/safeSvae.cpp file into your project.
+
+---
 
 Basic Functions:
 
@@ -16,6 +23,29 @@ Basic Functions:
 	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
 	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension, bool reportLoadingBackupAsAnError);
 ```
+
+Error reporting:
+Every function returns an error code. 
+You can use
+```cpp
+	const char* getErrorString(Errors e);
+```
+to get the error string 
+
+This are the possible error codes:
+```cpp
+enum Errors : int
+	{
+		noError,
+		couldNotOpenFinle,
+		fileSizeDitNotMatch,
+		checkSumFailed,
+		couldNotMakeBackup,
+		readBackup,
+	};
+```
+
+---
 
 Other Functions:
 
