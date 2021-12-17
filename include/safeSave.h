@@ -23,6 +23,9 @@ namespace sfs
 		readBackup,
 	};
 
+	
+	const char* getErrorString(Errors e);
+	
 	//can return error: couldNotOpenFinle
 	Errors readEntireFile(std::vector<char>& data, const char* name);
 	

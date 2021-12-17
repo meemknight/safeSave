@@ -9,6 +9,28 @@
 namespace sfs
 {
 
+	const char* errorsString[] =
+	{
+		"noError",
+		"couldNotOpenFinle",
+		"fileSizeDitNotMatch",
+		"checkSumFailed",
+		"couldNotMakeBackup",
+		"readBackup",
+	};
+
+	const char* getErrorString(Errors e)
+	{
+		if (e >= 0 && e < sizeof(errorsString) / sizeof(errorsString[0]))
+		{
+			return errorsString[e];
+		}
+		else
+		{
+			return "unknown error";
+		}
+	}
+
 	Errors readEntireFile(std::vector<char>& data, const char* name)
 	{
 		data.clear();
