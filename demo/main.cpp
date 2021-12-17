@@ -1,7 +1,6 @@
 #include <iostream>
 #include <safeSave.h>
 
-
 int main()
 {
 
@@ -94,7 +93,55 @@ int main()
 		}
 	}
 
+	{
+		bool passed = 0;
+		Test a, b;
 
+		if (sfs::safeSave((char*)&a, sizeof(a), RESOURCES_PATH "test4", true) == sfs::noError)
+		{
+
+			if (sfs::safeLoad((char*)&b, sizeof(b), RESOURCES_PATH "test4", true) == sfs::noError)
+			{
+				if (a == b)
+				{
+					std::ofstream f(RESOURCES_PATH "test41.bin", std::ios::binary);
+					f.close();
+
+					if (sfs::safeLoad((char*)&b, sizeof(b), RESOURCES_PATH "test4", true) == sfs::readBackup)
+					{
+						if (a == b)
+						{
+
+							std::ifstream in(RESOURCES_PATH "test42.bin", std::ios::binary);
+							std::vector<char> data;
+							char c=0;
+							while (in.read(&c, 1)) { data.push_back(c); }
+							in.close();
+							data[2] += 1;
+
+							std::ofstream of(RESOURCES_PATH "test42.bin", std::ios::binary);
+							std::copy(data.begin(), data.end(), std::ostream_iterator<char>(of));
+							of.close();
+
+							if (sfs::safeLoad((char*)&b, sizeof(b), RESOURCES_PATH "test4", true) == sfs::checkSumFailed)
+							{
+								passed = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (passed)
+		{
+			std::cout << "test 4: passed\n";
+		}
+		else
+		{
+			std::cout << "test 4: didn't pass\n";
+		}
+	}
 
 
 	std::cin.get();

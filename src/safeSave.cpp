@@ -31,7 +31,7 @@ namespace sfs
 		}
 	}
 
-	Errors readEntireFile(char* data, size_t size, const char* name, bool shouldMatchSize, int* bytesRead)
+	Errors readEntireFile(void* data, size_t size, const char* name, bool shouldMatchSize, int* bytesRead)
 	{
 		if (bytesRead)
 		{
@@ -53,7 +53,7 @@ namespace sfs
 				}
 				else
 				{
-					f.read(data, readSize);
+					f.read((char*)data, readSize);
 					if (bytesRead)
 					{
 						*bytesRead = readSize;
@@ -64,7 +64,7 @@ namespace sfs
 			}
 			else
 			{
-				f.read(data, std::min(size, readSize));
+				f.read((char*)data, std::min(size, readSize));
 
 				if (bytesRead)
 				{
@@ -80,19 +80,19 @@ namespace sfs
 		}
 	}
 	
-	using HashType = uint32_t;
-
-	inline HashType getHash(const char* data, size_t size)
+	using HashType = unsigned long long;
+	
+	//https://stackoverflow.com/questions/34595/what-is-a-good-hash-function
+	unsigned long long fnv_hash_1a_64(const void* key, int len)
 	{
-		HashType ret = 0;
-		for (size_t i = 0; i < size; i++)
-		{
-			ret += (data[i]*i) % 1523;
-		}
-		return ret;
+		const unsigned char* p = (const unsigned char*)key;
+		unsigned long long h = 0xcbf29ce484222325ULL;
+		for (int i = 0; i < len; i++)
+			h = (h ^ p[i]) * 0x100000001b3ULL;
+		return h;
 	}
 
-	Errors readEntireFileWithCheckSum(char* data, size_t size, const char* name)
+	Errors readEntireFileWithCheckSum(void* data, size_t size, const char* name)
 	{
 		std::ifstream f(name, std::ios::binary);
 		if (f.is_open())
@@ -109,11 +109,11 @@ namespace sfs
 			}
 			else
 			{
-				f.read(data, size);
+				f.read((char*)data, size);
 				HashType checkSum = 0;
 				f.read((char*)&checkSum, sizeof(HashType));
 
-				auto testCheck = getHash(data, size);
+				auto testCheck = fnv_hash_1a_64(data, size);
 
 				if (testCheck != checkSum)
 				{
@@ -132,14 +132,14 @@ namespace sfs
 		}
 	}
 
-	Errors writeEntireFileWithCheckSum(const char* data, size_t size, const char* name)
+	Errors writeEntireFileWithCheckSum(const void* data, size_t size, const char* name)
 	{
 		std::ofstream f(name, std::ios::binary);
 
 		if (f.is_open())
 		{
-			f.write(data, size);
-			auto testCheck = getHash(data, size);
+			f.write((char*)data, size);
+			auto testCheck = fnv_hash_1a_64(data, size);
 
 			f.write((char*)&testCheck, sizeof(testCheck));
 
@@ -156,13 +156,13 @@ namespace sfs
 		return writeEntireFile(data.data(), data.size(), name);
 	}
 
-	Errors writeEntireFile(const char* data, size_t size, const char* name)
+	Errors writeEntireFile(const void* data, size_t size, const char* name)
 	{
 		std::ofstream f(name, std::ios::binary);
 	
 		if (f.is_open())
 		{
-			f.write(data, size);
+			f.write((char*)data, size);
 			return noError;
 		}
 		else
@@ -171,7 +171,7 @@ namespace sfs
 		}
 	}
 
-	Errors safeSave(const void* data, size_t size, const char* nameWithoutExtension)
+	Errors safeSave(const void* data, size_t size, const char* nameWithoutExtension, bool reportnotMakingBackupAsAnError)
 	{
 		std::string file1 = nameWithoutExtension; file1 += "1.bin";
 		std::string file2 = nameWithoutExtension; file2 += "2.bin";
@@ -188,7 +188,14 @@ namespace sfs
 
 			if (err2 == couldNotOpenFinle)
 			{
-				return couldNotMakeBackup;
+				if (reportnotMakingBackupAsAnError)
+				{
+					return couldNotMakeBackup;
+				}
+				else
+				{
+					return noError;
+				}
 			}
 			else
 			{
@@ -197,7 +204,7 @@ namespace sfs
 		}
 	}
 
-	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension)
+	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension, bool reportLoadingBackupAsAnError)
 	{
 		std::string file1 = nameWithoutExtension; file1 += "1.bin";
 		std::string file2 = nameWithoutExtension; file2 += "2.bin";
@@ -215,7 +222,14 @@ namespace sfs
 
 			if (err2 == noError)
 			{
-				return readBackup;
+				if (reportLoadingBackupAsAnError)
+				{
+					return readBackup;
+				}
+				else
+				{
+					return noError;
+				}
 			}
 			else
 			{

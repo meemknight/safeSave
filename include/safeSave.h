@@ -27,22 +27,26 @@ namespace sfs
 	Errors readEntireFile(std::vector<char>& data, const char* name);
 	
 	//can return error: couldNotOpenFinle
-	Errors readEntireFile(char* data, size_t size, const char* name, bool shouldMatchSize, int *bytesRead = nullptr);
+	Errors readEntireFile(void* data, size_t size, const char* name, bool shouldMatchSize, int *bytesRead = nullptr);
 
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed
-	Errors readEntireFileWithCheckSum(char* data, size_t size, const char* name);
+	Errors readEntireFileWithCheckSum(void* data, size_t size, const char* name);
 
 	//can return error: couldNotOpenFinle
-	Errors writeEntireFileWithCheckSum(const char* data, size_t size, const char* name);
+	Errors writeEntireFileWithCheckSum(const void* data, size_t size, const char* name);
 
 	//can return error: couldNotOpenFinle
 	Errors writeEntireFile(const std::vector<char>& data, const char* name);
 	
 	//can return error: couldNotOpenFinle
-	Errors writeEntireFile(const char *data, size_t size, const char* name);
+	Errors writeEntireFile(const void*data, size_t size, const char* name);
 
-	//can return error: couldNotOpenFinle, couldNotMakeBackup (but will still save the first file)
-	Errors safeSave(const void* data, size_t size, const char* nameWithoutExtension);
+	//can return error: couldNotOpenFinle, 
+	//	couldNotMakeBackup (if reportnotMakingBackupAsAnError is true, but will still save the first file)
+	Errors safeSave(const void* data, size_t size, const char* nameWithoutExtension, bool reportnotMakingBackupAsAnError);
 
-	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension);
+	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed, 
+	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
+	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension, bool reportLoadingBackupAsAnError);
+
 };
