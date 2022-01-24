@@ -1,5 +1,7 @@
 #include <iostream>
 #include <safeSave.h>
+#include <memory.h>
+#include <iterator>
 
 int main()
 {
@@ -30,7 +32,7 @@ int main()
 	{
 		char a = 'a';
 		int b = 12;
-		float c = '0.12';
+		float c = 0.12f;
 		char d = 'b';
 
 		bool operator==(const Test& othre)
@@ -155,7 +157,8 @@ int main()
 			memcpy(fileMap.pointer, &a, sizeof(a));
 
 			sfs::closeFileMapping(fileMap);
-
+			//*((char*)fileMap.pointer) += 10;
+			
 			Test b;
 			if (sfs::readEntireFile(&b, sizeof(b), RESOURCES_PATH "test5.bin", true) == sfs::noError) 
 			{
@@ -176,6 +179,6 @@ int main()
 		}
 	}
 
-	std::cin.get();
+	//std::cin.get();
 	return 0;
 }

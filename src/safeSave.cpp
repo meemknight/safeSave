@@ -1,6 +1,3 @@
-#include "..\include\safeSave.h"
-#include "..\include\safeSave.h"
-#include "..\include\safeSave.h"
 #include <safeSave.h>
 
 
@@ -10,7 +7,9 @@
 #undef max
 
 #elif defined __linux__
-
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #endif
 
@@ -47,9 +46,9 @@ namespace sfs
 
 		if(f.is_open())
 		{
-			f.seekg(0, std::ios::_Seekend);
+			f.seekg(0, std::ios_base::end);
 			size_t size = f.tellg();
-			f.seekg(0, std::ios::_Seekbeg);
+			f.seekg(0, std::ios_base::beg);
 
 			data.resize(size);
 
@@ -72,9 +71,9 @@ namespace sfs
 		std::ifstream f(name, std::ios::binary);
 		if (f.is_open())
 		{
-			f.seekg(0, std::ios::_Seekend);
+			f.seekg(0, std::ios_base::end);
 			size_t readSize = f.tellg();
-			f.seekg(0, std::ios::_Seekbeg);
+			f.seekg(0, std::ios_base::beg);
 
 			if (shouldMatchSize)
 			{
@@ -128,9 +127,9 @@ namespace sfs
 		std::ifstream f(name, std::ios::binary);
 		if (f.is_open())
 		{
-			f.seekg(0, std::ios::_Seekend);
+			f.seekg(0, std::ios_base::end);
 			size_t readSize = f.tellg();
-			f.seekg(0, std::ios::_Seekbeg);
+			f.seekg(0, std::ios_base::beg);
 			
 			size_t sizeWithCheckSum = size + sizeof(HashType);
 
@@ -340,12 +339,47 @@ namespace sfs
 
 	Errors openFileMapping(FileMapping& fileMapping, const char* name, size_t size, bool createIfNotExisting)
 	{
-		return {};
+		int createDisposition = 0;
+		if(createIfNotExisting)
+		{
+			createDisposition = O_CREAT;
+		}
+
+		fileMapping.internal.fd = open(name, O_RDWR | createDisposition);
+
+		if(fileMapping.internal.fd == -1)
+		{
+			return Errors::couldNotOpenFinle;
+		}
+
+		if(ftruncate(fileMapping.internal.fd, size) == -1)
+		{
+			close(fileMapping.internal.fd);
+			return Errors::couldNotOpenFinle;
+		}
+		
+		fileMapping.pointer = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED,
+                fileMapping.internal.fd, 0);
+
+		if(fileMapping.pointer == MAP_FAILED)
+		{
+			fileMapping.pointer = 0;
+			close(fileMapping.internal.fd);
+			return Errors::couldNotOpenFinle;
+		}
+
+		fileMapping.size = size;
+		
+
+		return Errors::noError;
 	}
 
 	void closeFileMapping(FileMapping& fileMapping)
 	{
-
+		msync(fileMapping.pointer, fileMapping.size, MS_SYNC);
+		munmap(fileMapping.pointer, fileMapping.size);
+		close(fileMapping.internal.fd);
+		
 		fileMapping = {};
 	}
 

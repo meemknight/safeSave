@@ -76,7 +76,7 @@ namespace sfs
 		size_t size = 0;
 		struct
 		{
-			
+			int fd = 0;
 		}internal = {};
 	};
 
