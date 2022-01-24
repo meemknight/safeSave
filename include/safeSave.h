@@ -55,6 +55,8 @@ namespace sfs
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed
 	Errors safeLoadBackup(void* data, size_t size, const char* nameWithoutExtension);
 
+#if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
+
 	struct FileMapping
 	{
 		void* pointer = {};
@@ -65,6 +67,20 @@ namespace sfs
 			void* fileMapping = 0;
 		}internal = {};
 	};
+
+#elif defined __linux__
+
+	struct FileMapping
+	{
+		void* pointer = {};
+		size_t size = 0;
+		struct
+		{
+			
+		}internal = {};
+	};
+
+#endif
 
 	//can return error: couldNotOpenFinle
 	Errors openFileMapping(FileMapping& fileMapping, const char* name, size_t size, bool createIfNotExisting);

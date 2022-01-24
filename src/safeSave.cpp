@@ -3,9 +3,17 @@
 #include "..\include\safeSave.h"
 #include <safeSave.h>
 
+
+#if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
 #include <Windows.h>
 #undef min
 #undef max
+
+#elif defined __linux__
+
+
+#endif
+
 
 namespace sfs
 {
@@ -270,7 +278,9 @@ namespace sfs
 		return err2;
 	}
 
-	Errors openFileMapping(FileMapping &fileMapping, const char* name, size_t size, bool createIfNotExisting)
+#if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
+
+	Errors openFileMapping(FileMapping& fileMapping, const char* name, size_t size, bool createIfNotExisting)
 	{
 		fileMapping = {};
 
@@ -296,7 +306,7 @@ namespace sfs
 
 		fileMapping.internal.fileMapping = CreateFileMappingA(fileMapping.internal.fileHandle, NULL, PAGE_READWRITE, 0, size, NULL);
 
-		if(fileMapping.internal.fileMapping == NULL)
+		if (fileMapping.internal.fileMapping == NULL)
 		{
 			CloseHandle(fileMapping.internal.fileHandle);
 			return Errors::couldNotOpenFinle;
@@ -311,7 +321,7 @@ namespace sfs
 			CloseHandle(fileMapping.internal.fileHandle);
 			return Errors::couldNotOpenFinle;
 		}
-		
+
 		fileMapping.size = size;
 
 
@@ -325,5 +335,22 @@ namespace sfs
 		CloseHandle(fileMapping.internal.fileHandle);
 		fileMapping = {};
 	}
+
+#elif defined __linux__
+
+	Errors openFileMapping(FileMapping& fileMapping, const char* name, size_t size, bool createIfNotExisting)
+	{
+		return {};
+	}
+
+	void closeFileMapping(FileMapping& fileMapping)
+	{
+
+		fileMapping = {};
+	}
+
+#endif
+
+	
 
 }
