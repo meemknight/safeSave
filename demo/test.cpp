@@ -143,6 +143,38 @@ int main()
 		}
 	}
 
+	{
+		bool passed = 0;
+		
+		sfs::FileMapping fileMap;
+
+		if (sfs::openFileMapping(fileMap, RESOURCES_PATH "test5.bin", sizeof(Test), true) == sfs::noError)
+		{
+			Test a;
+			a.a += 10;
+			memcpy(fileMap.pointer, &a, sizeof(a));
+
+			sfs::closeFileMapping(fileMap);
+
+			Test b;
+			if (sfs::readEntireFile(&b, sizeof(b), RESOURCES_PATH "test5.bin", true) == sfs::noError) 
+			{
+				if (a == b)
+				{
+					passed = true;
+				}
+			};
+		}
+
+		if (passed)
+		{
+			std::cout << "test 5: passed\n";
+		}
+		else
+		{
+			std::cout << "test 5: didn't pass\n";
+		}
+	}
 
 	std::cin.get();
 	return 0;

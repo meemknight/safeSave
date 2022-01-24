@@ -1,6 +1,11 @@
 #include "..\include\safeSave.h"
+#include "..\include\safeSave.h"
+#include "..\include\safeSave.h"
 #include <safeSave.h>
 
+#include <Windows.h>
+#undef min
+#undef max
 
 namespace sfs
 {
@@ -265,5 +270,60 @@ namespace sfs
 		return err2;
 	}
 
+	Errors openFileMapping(FileMapping &fileMapping, const char* name, size_t size, bool createIfNotExisting)
+	{
+		fileMapping = {};
+
+		DWORD createDisposition = 0;
+
+		if (createIfNotExisting)
+		{
+			createDisposition = OPEN_ALWAYS;
+		}
+		else
+		{
+			createDisposition = OPEN_EXISTING;
+		}
+
+		fileMapping.internal.fileHandle = CreateFileA(name, GENERIC_READ | GENERIC_WRITE, 0,
+			NULL, createDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		if (fileMapping.internal.fileHandle == INVALID_HANDLE_VALUE)
+		{
+			auto err = GetLastError();
+			return Errors::couldNotOpenFinle;
+		}
+
+		fileMapping.internal.fileMapping = CreateFileMappingA(fileMapping.internal.fileHandle, NULL, PAGE_READWRITE, 0, size, NULL);
+
+		if(fileMapping.internal.fileMapping == NULL)
+		{
+			CloseHandle(fileMapping.internal.fileHandle);
+			return Errors::couldNotOpenFinle;
+		}
+
+
+		fileMapping.pointer = MapViewOfFile(fileMapping.internal.fileMapping, FILE_MAP_ALL_ACCESS, 0, 0, size);
+
+		if (fileMapping.pointer == nullptr)
+		{
+			CloseHandle(fileMapping.internal.fileMapping);
+			CloseHandle(fileMapping.internal.fileHandle);
+			return Errors::couldNotOpenFinle;
+		}
+		
+		fileMapping.size = size;
+
+
+		return Errors::noError;
+	}
+
+	void closeFileMapping(FileMapping& fileMapping)
+	{
+		UnmapViewOfFile(fileMapping.pointer);
+		CloseHandle(fileMapping.internal.fileMapping);
+		CloseHandle(fileMapping.internal.fileHandle);
+		fileMapping = {};
+	}
 
 }

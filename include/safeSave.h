@@ -55,4 +55,20 @@ namespace sfs
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed
 	Errors safeLoadBackup(void* data, size_t size, const char* nameWithoutExtension);
 
+	struct FileMapping
+	{
+		void* pointer = {};
+		size_t size = 0;
+		struct
+		{
+			void* fileHandle = 0;
+			void* fileMapping = 0;
+		}internal = {};
+	};
+
+	//can return error: couldNotOpenFinle
+	Errors openFileMapping(FileMapping& fileMapping, const char* name, size_t size, bool createIfNotExisting);
+
+	void closeFileMapping(FileMapping& fileMapping);
+
 };
