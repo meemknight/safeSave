@@ -51,4 +51,8 @@ namespace sfs
 	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
 	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension, bool reportLoadingBackupAsAnError);
 
+	//same as safeLoad but only loads the backup file.
+	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed
+	Errors safeLoadBackup(void* data, size_t size, const char* nameWithoutExtension);
+
 };

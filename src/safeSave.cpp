@@ -1,8 +1,4 @@
 #include "..\include\safeSave.h"
-#include "..\include\safeSave.h"
-#include "..\include\safeSave.h"
-#include "..\include\safeSave.h"
-#include "..\include\safeSave.h"
 #include <safeSave.h>
 
 
@@ -258,6 +254,15 @@ namespace sfs
 				return err2;
 			}
 		}
+	}
+
+	Errors safeLoadBackup(void* data, size_t size, const char* nameWithoutExtension)
+	{
+		std::string file2 = nameWithoutExtension; file2 += "2.bin";
+
+		//load backup
+		auto err2 = readEntireFileWithCheckSum((char*)data, size, file2.c_str());
+		return err2;
 	}
 
 
