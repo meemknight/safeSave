@@ -1,6 +1,5 @@
 #include <safeSave.h>
 
-
 #if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
 #include <Windows.h>
 #undef min
@@ -359,7 +358,7 @@ namespace sfs
 		}
 		
 		fileMapping.pointer = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED,
-                fileMapping.internal.fd, 0);
+				fileMapping.internal.fd, 0);
 
 		if(fileMapping.pointer == MAP_FAILED)
 		{
@@ -376,6 +375,7 @@ namespace sfs
 
 	void closeFileMapping(FileMapping& fileMapping)
 	{
+		fsync(fileMapping.internal.fd);
 		msync(fileMapping.pointer, fileMapping.size, MS_SYNC);
 		munmap(fileMapping.pointer, fileMapping.size);
 		close(fileMapping.internal.fd);
@@ -383,8 +383,6 @@ namespace sfs
 		fileMapping = {};
 	}
 
-#endif
-
-	
+#endif	
 
 }

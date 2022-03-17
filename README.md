@@ -6,6 +6,8 @@ Allows you to save data and don't worry if your save will get corupted. In the p
 If the original file has beed modified by the outside the library will load the backup. If both the backup and the original file are corupted the library will 
 report this error.
 
+Has other functionalities like file mappings (not working on linux yet).
+
 ---
 
 Integration: paste the include/safeSave.h file and the src/safeSvae.cpp file into your project.
@@ -71,4 +73,9 @@ Other Functions:
 	
 	//can return error: couldNotOpenFinle
 	Errors writeEntireFile(const void*data, size_t size, const char* name);
+
+	//can return error: couldNotOpenFinle
+	Errors openFileMapping(FileMapping& fileMapping, const char* name, size_t size, bool createIfNotExisting);
+
+	void closeFileMapping(FileMapping& fileMapping);
 ```
