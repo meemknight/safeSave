@@ -1,9 +1,9 @@
 #include <safeSave.h>
 
 #if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
+#define NOMINMAX 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#undef min
-#undef max
 
 #elif defined __linux__
 #include <sys/mman.h>
@@ -16,7 +16,7 @@
 namespace sfs
 {
 
-	const char* errorsString[] =
+	constexpr const char* errorsString[] =
 	{
 		"noError",
 		"couldNotOpenFinle",
