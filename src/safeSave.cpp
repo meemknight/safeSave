@@ -116,8 +116,19 @@ namespace sfs
 	{
 		const unsigned char* p = (const unsigned char*)key;
 		unsigned long long h = 0xcbf29ce484222325ULL;
-		for (int i = 0; i < len; i++)
+		for (int i = 0; i < len; i+=4)
+		{
+			h = (h ^ p[i + 0]) * 0x100000001b3ULL;
+			h = (h ^ p[i + 1]) * 0x100000001b3ULL;
+			h = (h ^ p[i + 2]) * 0x100000001b3ULL;
+			h = (h ^ p[i + 3]) * 0x100000001b3ULL;
+		}
+
+		for (int i = len - (len%4); i < len; i++)
+		{
 			h = (h ^ p[i]) * 0x100000001b3ULL;
+		}
+
 		return h;
 	}
 
