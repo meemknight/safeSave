@@ -1,3 +1,11 @@
+///////////////////////////////////////////
+//do not remove this notice
+//(c) Luta Vlad
+// 
+// safeSave 1.0.0
+// 
+///////////////////////////////////////////
+
 #include <safeSave.h>
 
 #if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
