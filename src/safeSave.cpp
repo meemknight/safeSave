@@ -61,6 +61,8 @@ namespace sfs
 
 			f.read(&data[0], size);
 
+			f.close();
+
 			return noError;
 		}else
 		{
