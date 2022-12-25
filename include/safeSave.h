@@ -9,6 +9,7 @@
 #pragma once
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 
 #ifdef _MSC_VER
 #pragma warning( disable : 26812 )
@@ -18,12 +19,16 @@ namespace sfs
 {
 	enum Errors : int
 	{
-		noError,
+		noError = 0,
 		couldNotOpenFinle,
 		fileSizeDitNotMatch,
 		checkSumFailed,
 		couldNotMakeBackup,
 		readBackup,
+		warningEntryAlreadyExists,
+		entryNotFound,
+		entryHasDifferentDataType,
+		couldNotParseData,
 	};
 	
 	const char* getErrorString(Errors e);
@@ -57,6 +62,80 @@ namespace sfs
 	//same as safeLoad but only loads the backup file.
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed
 	Errors safeLoadBackup(void* data, size_t size, const char* nameWithoutExtension);
+
+
+	//used to save data and read it
+	struct SafeSafeKeyValueData
+	{
+		struct Entry
+		{
+			enum Types
+			{
+				no_type = 0,
+				rawData_type,
+				int_type,
+				float_type,
+				bool_type,
+				string_type,
+			};
+
+			std::vector<unsigned char> data;
+			unsigned char type = 0;
+			union Primitives
+			{
+				std::int32_t intData;
+				float floatData;
+				bool boolData;
+			}primitives;
+		};
+
+		std::unordered_map<std::string, Entry> entries;
+
+		bool entryExists(std::string at);
+
+		//can return error: entryNotFound
+		Errors getEntryType(std::string at, unsigned char &type);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setRawData(std::string at, void *data, size_t size);
+
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getRawDataPointer(std::string at, void* &data, size_t &size);
+
+		//won't change i if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getInt(std::string at, int32_t &i);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setInt(std::string at, int32_t i);
+
+		//won't change f if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getFloat(std::string at, float &f);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setFloat(std::string at, float f);
+
+		//won't change b if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getBool(std::string at, bool &b);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setBool(std::string at, bool b);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setString(std::string at, std::string value);
+
+		//won't change s if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getString(std::string at, std::string &s);
+
+		std::vector<unsigned char> formatIntoFileData();
+
+		//can return error: couldNotParseData
+		Errors loadFromFileData(unsigned char *data, size_t size);
+	};
+
 
 #if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
 

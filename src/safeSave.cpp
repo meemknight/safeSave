@@ -61,8 +61,6 @@ namespace sfs
 
 			f.read(&data[0], size);
 
-			f.close();
-
 			return noError;
 		}else
 		{
@@ -405,5 +403,438 @@ namespace sfs
 	}
 
 #endif	
+
+	bool SafeSafeKeyValueData::entryExists(std::string at)
+	{
+		return entries.find(at) != entries.end();
+	}
+
+	Errors SafeSafeKeyValueData::getEntryType(std::string at, unsigned char &type)
+	{
+		type = 0;
+
+		auto it = entries.find(at);
+
+		if (it == entries.end()) { return Errors::entryNotFound; }
+
+		type = it->second.type;
+
+		return Errors::noError;
+	}
+
+	Errors SafeSafeKeyValueData::setRawData(std::string at, void *data, size_t size)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::rawData_type;
+			it->second.data.clear();
+			it->second.data.resize(size);
+			memcpy(it->second.data.data(), data, size);
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+			e.type = Entry::Types::rawData_type;
+			e.data.resize(size);
+			memcpy(e.data.data(), data, size);
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setInt(std::string at, int32_t i)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::int_type;
+			it->second.data.clear();
+			it->second.primitives.intData = i;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::int_type;
+			e.primitives.intData = i;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+
+	Errors SafeSafeKeyValueData::getRawDataPointer(std::string at, void *&data, size_t &size)
+	{
+		data = 0;
+		size = 0;
+
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::rawData_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				size = it->second.data.size();
+				data = it->second.data.data();
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getInt(std::string at, int32_t &i)
+	{
+		auto it = entries.find(at);
+		
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::int_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				i = it->second.primitives.intData;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setFloat(std::string at, float f)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::float_type;
+			it->second.data.clear();
+			it->second.primitives.floatData = f;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::float_type;
+			e.primitives.floatData = f;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+
+	Errors SafeSafeKeyValueData::getFloat(std::string at, float &f)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::float_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				f = it->second.primitives.floatData;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getBool(std::string at, bool &b)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::bool_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				b = it->second.primitives.boolData;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setBool(std::string at, bool b)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::bool_type;
+			it->second.data.clear();
+			it->second.data.push_back(b);
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::bool_type;
+			e.primitives.boolData = b;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setString(std::string at, std::string value)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::string_type;
+			it->second.data.clear();
+			size_t size = value.length();
+			it->second.data.resize(size);
+			memcpy(it->second.data.data(), value.c_str(), size);
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+			e.type = Entry::Types::string_type;
+			size_t size = value.length();
+			e.data.resize(size);
+			memcpy(e.data.data(), value.c_str(), size);
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getString(std::string at, std::string &s)
+	{
+		return Errors();
+	}
+
+	std::vector<unsigned char> SafeSafeKeyValueData::formatIntoFileData()
+	{
+		std::vector<unsigned char> ret;
+		ret.reserve(200);
+
+		size_t size = 0;
+		for (auto &e : entries)
+		{
+			auto &s = e.first;
+			auto &d = e.second;
+
+			size += s.size() + 1;
+			size += d.data.size();
+			size += 1; //type
+			size += 4; //data size
+		}
+
+		ret.reserve(size);
+
+		for (auto &e : entries)
+		{
+			auto &s = e.first;
+			auto &d = e.second;
+			
+			for (auto c : s)
+			{
+				ret.push_back(*(unsigned char*)&c);
+			}
+			ret.push_back(0);
+
+			ret.push_back(d.type);
+			
+			if (d.type == Entry::Types::rawData_type)
+			{
+				size_t size = d.data.size();
+				ret.push_back(((unsigned char *)(&size))[0]);
+				ret.push_back(((unsigned char *)(&size))[1]);
+				ret.push_back(((unsigned char *)(&size))[2]);
+				ret.push_back(((unsigned char *)(&size))[3]);
+
+				for (auto d : d.data)
+				{
+					ret.push_back(d);
+				}
+			}
+			else if(d.type == Entry::Types::bool_type)
+			{
+				ret.push_back(d.primitives.boolData);
+			}
+			else if (d.type == Entry::Types::int_type)
+			{
+				std::int32_t i = d.primitives.intData;
+				ret.push_back(((unsigned char*)(&i))[0]);
+				ret.push_back(((unsigned char*)(&i))[1]);
+				ret.push_back(((unsigned char*)(&i))[2]);
+				ret.push_back(((unsigned char*)(&i))[3]);
+			}
+			else if (d.type == Entry::Types::float_type)
+			{
+				float f = d.primitives.intData;
+				ret.push_back(((unsigned char *)(&f))[0]);
+				ret.push_back(((unsigned char *)(&f))[1]);
+				ret.push_back(((unsigned char *)(&f))[2]);
+				ret.push_back(((unsigned char *)(&f))[3]);
+			}
+
+		}
+
+		return ret;
+	}
+
+	Errors SafeSafeKeyValueData::loadFromFileData(unsigned char *data, size_t size)
+	{
+		*this = {};
+
+		std::string currentName = {};
+
+		for (unsigned char *c = data; c < data + size; c++)
+		{
+			bool readingName = 1;
+			if (*c == 0)
+			{
+				readingName = 0;
+			}
+			else
+			{
+				currentName.push_back(*(char*)c);
+			}
+
+			if (!readingName)
+			{
+				c++; if (c >= data + size) { return Errors::couldNotParseData; }
+
+				unsigned char type = *c;
+
+				if (type == Entry::Types::bool_type)
+				{
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					bool b = *c;
+
+					Entry e;
+					e.type = Entry::Types::bool_type;
+					e.primitives.boolData = b;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::int_type)
+				{
+					std::int32_t i = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&i))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&i))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&i))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&i))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::int_type;
+					e.primitives.intData = i;
+					
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::float_type)
+				{
+					float f = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&f))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&f))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&f))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&f))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::float_type;
+					e.primitives.floatData = f;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::rawData_type)
+				{
+					size_t s = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&s))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&s))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&s))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((unsigned char *)(&s))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::rawData_type;
+					e.data.reserve(s);
+
+					for (int i = 0; i < s; i++)
+					{
+						c++; if (c >= data + size) { return Errors::couldNotParseData; }
+						e.data.push_back(*c);
+					}
+					
+					entries[currentName] = std::move(e);
+
+				}
+
+				currentName = {};
+			}
+
+		}
+
+		if (currentName == "")
+		{
+			return Errors::noError;
+		}
+		else
+		{
+			return Errors::couldNotParseData;
+		}
+
+	}
+
 
 }

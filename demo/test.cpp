@@ -179,6 +179,80 @@ int main()
 		}
 	}
 
+	{
+		bool passed = 1;
+
+		sfs::SafeSafeKeyValueData data;
+		Test t{'b', 12,1.2, 'c'};
+
+		if (data.setRawData("test1", &t, sizeof(t)) != sfs::Errors::noError) { passed = 0; };
+		if (data.setRawData("test2", &t, sizeof(t)) != sfs::Errors::noError) { passed = 0; };
+		if (data.setRawData("test1", &t, sizeof(t)) != sfs::Errors::warningEntryAlreadyExists) { passed = 0; };
+		if (data.setBool("bool", 1) != sfs::Errors::noError) { passed = 0; };
+		if (data.setInt("int", 6996) != sfs::Errors::noError) { passed = 0; };
+		
+		auto binary = data.formatIntoFileData();
+		data = {};
+
+		data.loadFromFileData(&binary[0], binary.size());
+
+
+		int i = 0;
+		if (data.getInt("test1", i) != sfs::Errors::entryHasDifferentDataType) { passed = 0; };
+
+		unsigned char type = 0;
+		if (data.getEntryType("test__2", type) != sfs::Errors::entryNotFound) { passed = 0; }
+		if (data.getEntryType("test1", type) != sfs::Errors::noError) { passed = 0; }
+
+
+
+		if (type != sfs::SafeSafeKeyValueData::Entry::Types::rawData_type) { passed = 0; }
+
+		Test read = {};
+
+		if (!data.entryExists("test1")) { passed = 0; }
+		if (!data.entryExists("test2")) { passed = 0; }
+		if (data.entryExists("test________")) { passed = 0; }
+
+		{
+			bool b2 = 0;
+			if (data.getBool("bool", b2) != sfs::Errors::noError || b2 != true)
+			{ passed = 0; }
+		}
+
+		{
+			int i2 = 0;
+			if (data.getInt("int", i2) != sfs::Errors::noError || i2 != 6996)
+			{
+				passed = 0;
+			}
+		}
+
+		void *ptr = 0;
+		size_t s = 0;
+		data.getRawDataPointer("test1", ptr, s);
+		
+		if (s != sizeof(Test) || ptr == 0) 
+		{ 
+			passed = 0; 
+		}
+		else
+		{
+			memcpy(&read, ptr, s);
+		}
+
+		if (!(t == read)) { passed = 0; }
+
+		if (passed)
+		{
+			std::cout << "test 6: passed\n";
+		}
+		else
+		{
+			std::cout << "test 6: didn't pass\n";
+		}
+	}
+
 	std::cin.get();
 	return 0;
 }
