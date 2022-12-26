@@ -112,6 +112,7 @@ namespace sfs
 
 		std::unordered_map<std::string, Entry> entries;
 
+		//returns true if entry exists
 		bool entryExists(std::string at);
 
 		//can return error: entryNotFound
