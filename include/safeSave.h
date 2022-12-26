@@ -29,6 +29,7 @@ namespace sfs
 		entryNotFound,
 		entryHasDifferentDataType,
 		couldNotParseData,
+		fileSizeNotBigEnough,
 	};
 	
 	const char* getErrorString(Errors e);
@@ -36,28 +37,48 @@ namespace sfs
 	//can return error: couldNotOpenFinle
 	Errors readEntireFile(std::vector<char>& data, const char* name);
 	
-	//can return error: couldNotOpenFinle
+	//reades the content of a file (size bytes), if shouldMatchSize is false will read the entire fill untill size bytes are read or the entire file was read
+	//can return error: couldNotOpenFinle, fileSizeDitNotMatch
 	Errors readEntireFile(void* data, size_t size, const char* name, bool shouldMatchSize, int *bytesRead = nullptr);
 
+	//gets the file size
+	//can return error: couldNotOpenFinle
+	Errors getFileSize(const char *name, size_t &size);
+
+	//reades the entire content of the data to a file and uses checkSum
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed
 	Errors readEntireFileWithCheckSum(void* data, size_t size, const char* name);
 
+	//reades the entire content of the data to a file and uses checkSum
+	//can return error: couldNotOpenFinle, fileSizeNotBigEnough
+	Errors readEntireFileWithCheckSum(std::vector<char> &data, const char *name);
+
+	//writes the entire content of the data to a file and uses checkSum
 	//can return error: couldNotOpenFinle
 	Errors writeEntireFileWithCheckSum(const void* data, size_t size, const char* name);
 
+	//writes the entire content of the data to a file
 	//can return error: couldNotOpenFinle
 	Errors writeEntireFile(const std::vector<char>& data, const char* name);
 	
+	//writes the entire content of the data to a file
 	//can return error: couldNotOpenFinle
 	Errors writeEntireFile(const void*data, size_t size, const char* name);
 
+	//saved the data with a check sum and a backup
 	//can return error: couldNotOpenFinle, 
 	//	couldNotMakeBackup (if reportnotMakingBackupAsAnError is true, but will still save the first file)
 	Errors safeSave(const void* data, size_t size, const char* nameWithoutExtension, bool reportnotMakingBackupAsAnError);
 
+	//loads the data that was saved using safeSave
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed, 
 	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
 	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension, bool reportLoadingBackupAsAnError);
+
+	//loads the data that was saved using safeSave and stored as a SafeSafeKeyValueData structure
+	//can return error: couldNotOpenFinle, checkSumFailed, fileSizeNotBigEnough
+	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
+	Errors safeLoad(std::vector<char> &data, const char *nameWithoutExtension, bool reportLoadingBackupAsAnError);
 
 	//same as safeLoad but only loads the backup file.
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed
@@ -79,8 +100,8 @@ namespace sfs
 				string_type,
 			};
 
-			std::vector<unsigned char> data;
-			unsigned char type = 0;
+			std::vector<char> data;
+			char type = 0;
 			union Primitives
 			{
 				std::int32_t intData;
@@ -94,7 +115,7 @@ namespace sfs
 		bool entryExists(std::string at);
 
 		//can return error: entryNotFound
-		Errors getEntryType(std::string at, unsigned char &type);
+		Errors getEntryType(std::string at, char &type);
 
 		//can return error: warningEntryAlreadyExists, if so it will overwrite data
 		Errors setRawData(std::string at, void *data, size_t size);
@@ -130,11 +151,22 @@ namespace sfs
 		//can return error: entryNotFound, entryHasDifferentDataType
 		Errors getString(std::string at, std::string &s);
 
-		std::vector<unsigned char> formatIntoFileData();
+		std::vector<char> formatIntoFileData();
 
 		//can return error: couldNotParseData
-		Errors loadFromFileData(unsigned char *data, size_t size);
+		Errors loadFromFileData(char *data, size_t size);
 	};
+	
+	//saved the data stored as a SafeSafeKeyValueData structure in a binary format with a check sum and a backup
+	//can return error: couldNotOpenFinle, 
+	//	couldNotMakeBackup (if reportnotMakingBackupAsAnError is true, but will still save the first file)
+	Errors safeSave(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportnotMakingBackupAsAnError);
+
+	//loads the data that was saved using safeSave and stored as a SafeSafeKeyValueData structure
+	//can return error: couldNotOpenFinle, fileSizeNotBigEnough, checkSumFailed, couldNotParseData
+	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded from the backup)
+	Errors safeLoad(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportLoadingBackupAsAnError);
+
 
 
 #if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
@@ -164,6 +196,7 @@ namespace sfs
 
 #endif
 
+	//a file mapping maps the content of a file to ram
 	//can return error: couldNotOpenFinle
 	Errors openFileMapping(FileMapping& fileMapping, const char* name, size_t size, bool createIfNotExisting);
 

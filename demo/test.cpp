@@ -189,18 +189,22 @@ int main()
 		if (data.setRawData("test2", &t, sizeof(t)) != sfs::Errors::noError) { passed = 0; };
 		if (data.setRawData("test1", &t, sizeof(t)) != sfs::Errors::warningEntryAlreadyExists) { passed = 0; };
 		if (data.setBool("bool", 1) != sfs::Errors::noError) { passed = 0; };
-		if (data.setInt("int", 6996) != sfs::Errors::noError) { passed = 0; };
+		if (data.setInt("int", 69960000) != sfs::Errors::noError) { passed = 0; };
+		if (data.setString("str", "testString") != sfs::Errors::noError) { passed = 0; };
 		
+		//if (sfs::safeSave(data, RESOURCES_PATH "test6", true) != sfs::noError) { passed = 0; };
+		//data = {};
+		//if (sfs::safeLoad(data, RESOURCES_PATH "test6", true) != sfs::noError) { passed = 0; };
+
 		auto binary = data.formatIntoFileData();
 		data = {};
-
 		data.loadFromFileData(&binary[0], binary.size());
 
 
 		int i = 0;
 		if (data.getInt("test1", i) != sfs::Errors::entryHasDifferentDataType) { passed = 0; };
 
-		unsigned char type = 0;
+		char type = 0;
 		if (data.getEntryType("test__2", type) != sfs::Errors::entryNotFound) { passed = 0; }
 		if (data.getEntryType("test1", type) != sfs::Errors::noError) { passed = 0; }
 
@@ -222,7 +226,15 @@ int main()
 
 		{
 			int i2 = 0;
-			if (data.getInt("int", i2) != sfs::Errors::noError || i2 != 6996)
+			if (data.getInt("int", i2) != sfs::Errors::noError || i2 != 69960000)
+			{
+				passed = 0;
+			}
+		}
+
+		{
+			std::string s2 = {};
+			if (data.getString("str", s2) != sfs::Errors::noError || s2 != "testString")
 			{
 				passed = 0;
 			}
@@ -250,6 +262,127 @@ int main()
 		else
 		{
 			std::cout << "test 6: didn't pass\n";
+		}
+	}
+
+	{
+		bool passed = 1;
+
+		std::vector<char> data = {1,2,3,4,65,-77,5,3,2,12,-3,5,1,69,4,3,22,34,2,8,8,7,65};
+
+		if (sfs::writeEntireFileWithCheckSum(data.data(), data.size(), RESOURCES_PATH "test7") == sfs::noError)
+		{
+			std::vector<char> data2;
+
+			if (sfs::readEntireFileWithCheckSum(data2, RESOURCES_PATH "test7") == sfs::noError)
+			{
+				if (data2.size() != data.size()) { passed = 0; }
+				else
+				{
+					for (int i = 0; i < data.size(); i++)
+					{
+						if (data[i] != data2[i]) { passed = 0; break; }
+					}
+				}
+			}
+			else
+			{
+				passed = 0;
+			}
+		}
+		else
+		{
+			passed = 0;
+		}
+
+
+		if (passed)
+		{
+			std::cout << "test 7: passed\n";
+		}
+		else
+		{
+			std::cout << "test 7: didn't pass\n";
+		}
+	}
+
+	{
+		bool passed = 1;
+
+		std::vector<char> data = {1,2,3,4,65,-77,5,3,2,12,-3,5,1,69,4,3,22,34,2,8,8,7,65};
+
+		if (sfs::safeSave(data.data(), data.size(), RESOURCES_PATH "test8", true) == sfs::noError)
+		{
+			std::vector<char> data2;
+
+			if (sfs::safeLoad(data2, RESOURCES_PATH "test8", true) == sfs::noError)
+			{
+				if (data2.size() != data.size()) { passed = 0; }
+				else
+				{
+					for (int i = 0; i < data.size(); i++)
+					{
+						if (data[i] != data2[i]) { passed = 0; break; }
+					}
+				}
+			}
+			else
+			{
+				passed = 0;
+			}
+		}
+		else
+		{
+			passed = 0;
+		}
+
+
+		if (passed)
+		{
+			std::cout << "test 8: passed\n";
+		}
+		else
+		{
+			std::cout << "test 8: didn't pass\n";
+		}
+	}
+
+	{
+		bool passed = 1;
+
+		sfs::SafeSafeKeyValueData data;
+		Test t{'b', 12,1.2, 'c'};
+		if (data.setRawData("test1", &t, sizeof(t)) != sfs::Errors::noError) { passed = 0; };
+
+		if (sfs::safeSave(data, RESOURCES_PATH "test9", true) != sfs::noError) { passed = 0; };
+		
+		sfs::SafeSafeKeyValueData data2;
+		if (sfs::safeLoad(data2, RESOURCES_PATH "test9", true) != sfs::noError) { passed = 0; };
+
+	
+		void *ptr = 0;
+		size_t s = 0;
+		data.getRawDataPointer("test1", ptr, s);
+		Test read = {};
+		if (s != sizeof(Test) || ptr == 0)
+		{
+			passed = 0;
+		}
+		else
+		{
+			memcpy(&read, ptr, s);
+		}
+		
+		if (!(t == read)) { passed = 0; }
+
+
+		if (passed)
+		{
+			std::cout << "test 9: passed\n";
+		}
+		else
+		{
+			std::cout << "test 9: didn't pass\n";
 		}
 	}
 

@@ -116,6 +116,27 @@ namespace sfs
 			return couldNotOpenFinle;
 		}
 	}
+
+	Errors getFileSize(const char *name, size_t &size)
+	{
+		size = 0;
+
+		std::ifstream f(name, std::ios::binary);
+
+		if (f.is_open())
+		{
+			f.seekg(0, std::ios_base::end);
+			size_t readSize = f.tellg();
+			f.close();
+			size = readSize;
+
+			return noError;
+		}
+		else
+		{
+			return couldNotOpenFinle;
+		}
+	}
 	
 	using HashType = unsigned long long;
 	
@@ -124,18 +145,25 @@ namespace sfs
 	{
 		const unsigned char* p = (const unsigned char*)key;
 		unsigned long long h = 0xcbf29ce484222325ULL;
-		for (int i = 0; i < len; i+=4)
-		{
-			h = (h ^ p[i + 0]) * 0x100000001b3ULL;
-			h = (h ^ p[i + 1]) * 0x100000001b3ULL;
-			h = (h ^ p[i + 2]) * 0x100000001b3ULL;
-			h = (h ^ p[i + 3]) * 0x100000001b3ULL;
-		}
 
-		for (int i = len - (len%4); i < len; i++)
+		for (int i = 0; i < len; i++)
 		{
 			h = (h ^ p[i]) * 0x100000001b3ULL;
 		}
+
+		//if(len >= 4)
+		//for (int i = 0; i < len; i+=4)
+		//{
+		//	h = (h ^ p[i + 0]) * 0x100000001b3ULL;
+		//	h = (h ^ p[i + 1]) * 0x100000001b3ULL;
+		//	h = (h ^ p[i + 2]) * 0x100000001b3ULL;
+		//	h = (h ^ p[i + 3]) * 0x100000001b3ULL;
+		//}
+		//
+		//for (int i = len - (len%4); i < len; i++)
+		//{
+		//	h = (h ^ p[i]) * 0x100000001b3ULL;
+		//}
 
 		return h;
 	}
@@ -173,6 +201,48 @@ namespace sfs
 				}
 			}
 			
+		}
+		else
+		{
+			return couldNotOpenFinle;
+		}
+	}
+
+	Errors readEntireFileWithCheckSum(std::vector<char> &data, const char *name)
+	{
+		data.clear();
+
+		std::ifstream f(name, std::ios::binary);
+		if (f.is_open())
+		{
+			f.seekg(0, std::ios_base::end);
+			size_t readSize = f.tellg();
+			f.seekg(0, std::ios_base::beg);
+
+			if(readSize > sizeof(HashType))
+			{
+				data.resize(readSize - sizeof(HashType));
+				f.read(&data[0], readSize - sizeof(HashType));
+
+				HashType checkSum = 0;
+				f.read((char *)&checkSum, sizeof(HashType));
+
+				auto testCheck = fnv_hash_1a_64(&data[0], data.size());
+
+				if (testCheck != checkSum)
+				{
+					return checkSumFailed;
+				}
+				else
+				{
+					return noError;
+				}
+			}
+			else
+			{
+				return fileSizeNotBigEnough;
+			}
+
 		}
 		else
 		{
@@ -286,6 +356,42 @@ namespace sfs
 		}
 	}
 
+	Errors safeLoad(std::vector<char> &data, const char *nameWithoutExtension, bool reportLoadingBackupAsAnError)
+	{
+		data.clear();
+
+		std::string file1 = nameWithoutExtension; file1 += "1.bin";
+		std::string file2 = nameWithoutExtension; file2 += "2.bin";
+
+		auto err = readEntireFileWithCheckSum(data, file1.c_str());
+
+		if (err == noError)
+		{
+			return noError;
+		}
+		else
+		{
+			//load backup
+			auto err2 = readEntireFileWithCheckSum(data, file2.c_str());
+
+			if (err2 == noError)
+			{
+				if (reportLoadingBackupAsAnError)
+				{
+					return readBackup;
+				}
+				else
+				{
+					return noError;
+				}
+			}
+			else
+			{
+				return err2;
+			}
+		}
+	}
+
 	Errors safeLoadBackup(void* data, size_t size, const char* nameWithoutExtension)
 	{
 		std::string file2 = nameWithoutExtension; file2 += "2.bin";
@@ -294,6 +400,31 @@ namespace sfs
 		auto err2 = readEntireFileWithCheckSum((char*)data, size, file2.c_str());
 		return err2;
 	}
+
+	Errors safeSave(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportnotMakingBackupAsAnError)
+	{
+		auto rez = data.formatIntoFileData();
+
+		return safeSave(rez.data(), rez.size(), nameWithoutExtension, reportnotMakingBackupAsAnError);
+	}
+
+	Errors safeLoad(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportLoadingBackupAsAnError)
+	{
+		data = {};
+		
+		std::vector<char> readData;
+		auto errCode = safeLoad(readData, nameWithoutExtension, reportLoadingBackupAsAnError);
+
+		if (errCode == noError || errCode == readBackup)
+		{
+			return data.loadFromFileData(readData.data(), readData.size());
+		}
+		else
+		{
+			return errCode;
+		}
+	}
+
 
 #if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
 
@@ -409,7 +540,7 @@ namespace sfs
 		return entries.find(at) != entries.end();
 	}
 
-	Errors SafeSafeKeyValueData::getEntryType(std::string at, unsigned char &type)
+	Errors SafeSafeKeyValueData::getEntryType(std::string at, char &type)
 	{
 		type = 0;
 
@@ -646,12 +777,31 @@ namespace sfs
 
 	Errors SafeSafeKeyValueData::getString(std::string at, std::string &s)
 	{
-		return Errors();
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::string_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				s.clear();
+				s.resize(it->second.data.size());
+				memcpy(&s[0], it->second.data.data(), it->second.data.size());
+				return Errors::noError;
+			}
+		}
 	}
 
-	std::vector<unsigned char> SafeSafeKeyValueData::formatIntoFileData()
+	std::vector<char> SafeSafeKeyValueData::formatIntoFileData()
 	{
-		std::vector<unsigned char> ret;
+		std::vector<char> ret;
 		ret.reserve(200);
 
 		size_t size = 0;
@@ -675,19 +825,19 @@ namespace sfs
 			
 			for (auto c : s)
 			{
-				ret.push_back(*(unsigned char*)&c);
+				ret.push_back(c);
 			}
 			ret.push_back(0);
 
 			ret.push_back(d.type);
 			
-			if (d.type == Entry::Types::rawData_type)
+			if (d.type == Entry::Types::rawData_type || d.type == Entry::Types::string_type)
 			{
 				size_t size = d.data.size();
-				ret.push_back(((unsigned char *)(&size))[0]);
-				ret.push_back(((unsigned char *)(&size))[1]);
-				ret.push_back(((unsigned char *)(&size))[2]);
-				ret.push_back(((unsigned char *)(&size))[3]);
+				ret.push_back(((char *)(&size))[0]);
+				ret.push_back(((char *)(&size))[1]);
+				ret.push_back(((char *)(&size))[2]);
+				ret.push_back(((char *)(&size))[3]);
 
 				for (auto d : d.data)
 				{
@@ -701,18 +851,18 @@ namespace sfs
 			else if (d.type == Entry::Types::int_type)
 			{
 				std::int32_t i = d.primitives.intData;
-				ret.push_back(((unsigned char*)(&i))[0]);
-				ret.push_back(((unsigned char*)(&i))[1]);
-				ret.push_back(((unsigned char*)(&i))[2]);
-				ret.push_back(((unsigned char*)(&i))[3]);
+				ret.push_back(((char*)(&i))[0]);
+				ret.push_back(((char*)(&i))[1]);
+				ret.push_back(((char*)(&i))[2]);
+				ret.push_back(((char*)(&i))[3]);
 			}
 			else if (d.type == Entry::Types::float_type)
 			{
 				float f = d.primitives.intData;
-				ret.push_back(((unsigned char *)(&f))[0]);
-				ret.push_back(((unsigned char *)(&f))[1]);
-				ret.push_back(((unsigned char *)(&f))[2]);
-				ret.push_back(((unsigned char *)(&f))[3]);
+				ret.push_back(((char *)(&f))[0]);
+				ret.push_back(((char *)(&f))[1]);
+				ret.push_back(((char *)(&f))[2]);
+				ret.push_back(((char *)(&f))[3]);
 			}
 
 		}
@@ -720,13 +870,13 @@ namespace sfs
 		return ret;
 	}
 
-	Errors SafeSafeKeyValueData::loadFromFileData(unsigned char *data, size_t size)
+	Errors SafeSafeKeyValueData::loadFromFileData(char *data, size_t size)
 	{
 		*this = {};
 
 		std::string currentName = {};
 
-		for (unsigned char *c = data; c < data + size; c++)
+		for (char *c = data; c < data + size; c++)
 		{
 			bool readingName = 1;
 			if (*c == 0)
@@ -735,14 +885,14 @@ namespace sfs
 			}
 			else
 			{
-				currentName.push_back(*(char*)c);
+				currentName.push_back(*c);
 			}
 
 			if (!readingName)
 			{
 				c++; if (c >= data + size) { return Errors::couldNotParseData; }
 
-				unsigned char type = *c;
+				char type = *c;
 
 				if (type == Entry::Types::bool_type)
 				{
@@ -760,13 +910,13 @@ namespace sfs
 					std::int32_t i = 0;
 
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&i))[0] = *c;
+					((char *)(&i))[0] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&i))[1] = *c;
+					((char *)(&i))[1] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&i))[2] = *c;
+					((char *)(&i))[2] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&i))[3] = *c;
+					((char *)(&i))[3] = *c;
 
 					Entry e;
 					e.type = Entry::Types::int_type;
@@ -779,13 +929,13 @@ namespace sfs
 					float f = 0;
 
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&f))[0] = *c;
+					((char *)(&f))[0] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&f))[1] = *c;
+					((char *)(&f))[1] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&f))[2] = *c;
+					((char *)(&f))[2] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&f))[3] = *c;
+					((char *)(&f))[3] = *c;
 
 					Entry e;
 					e.type = Entry::Types::float_type;
@@ -798,13 +948,13 @@ namespace sfs
 					size_t s = 0;
 
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&s))[0] = *c;
+					((char *)(&s))[0] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&s))[1] = *c;
+					((char *)(&s))[1] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&s))[2] = *c;
+					((char *)(&s))[2] = *c;
 					c++; if (c >= data + size) { return Errors::couldNotParseData; }
-					((unsigned char *)(&s))[3] = *c;
+					((char *)(&s))[3] = *c;
 
 					Entry e;
 					e.type = Entry::Types::rawData_type;
@@ -816,6 +966,31 @@ namespace sfs
 						e.data.push_back(*c);
 					}
 					
+					entries[currentName] = std::move(e);
+				}
+				else if (type == Entry::Types::string_type)
+				{
+					size_t s = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&s))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&s))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&s))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&s))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::string_type;
+					e.data.reserve(s);
+
+					for (int i = 0; i < s; i++)
+					{
+						c++; if (c >= data + size) { return Errors::couldNotParseData; }
+						e.data.push_back(*c);
+					}
+
 					entries[currentName] = std::move(e);
 
 				}
