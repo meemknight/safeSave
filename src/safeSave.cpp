@@ -32,7 +32,13 @@ namespace sfs
 		"checkSumFailed",
 		"couldNotMakeBackup",
 		"readBackup",
+		"warningEntryAlreadyExists",
+		"entryNotFound",
+		"entryHasDifferentDataType",
+		"couldNotParseData",
+		"fileSizeNotBigEnough",
 	};
+
 
 	const char* getErrorString(Errors e)
 	{
