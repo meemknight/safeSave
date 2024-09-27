@@ -2,7 +2,7 @@
 //do not remove this notice
 //(c) Luta Vlad
 // 
-// safeSave 1.0.0
+// safeSave 1.0.1
 // 
 ///////////////////////////////////////////
 
@@ -39,7 +39,8 @@ namespace sfs
 	
 	//reades the content of a file (size bytes), if shouldMatchSize is false will read the entire fill untill size bytes are read or the entire file was read
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch
-	Errors readEntireFile(void* data, size_t size, const char* name, bool shouldMatchSize, int *bytesRead = nullptr);
+	Errors readEntireFile(void* data, size_t size, const char* name, bool shouldMatchSize,
+		int *bytesRead = nullptr);
 
 	//gets the file size
 	//can return error: couldNotOpenFinle
@@ -78,7 +79,8 @@ namespace sfs
 	//loads the data that was saved using safeSave and stored as a SafeSafeKeyValueData structure
 	//can return error: couldNotOpenFinle, checkSumFailed, fileSizeNotBigEnough
 	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
-	Errors safeLoad(std::vector<char> &data, const char *nameWithoutExtension, bool reportLoadingBackupAsAnError);
+	Errors safeLoad(std::vector<char> &data, const char *nameWithoutExtension, 
+		bool reportLoadingBackupAsAnError);
 
 	//same as safeLoad but only loads the backup file.
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed

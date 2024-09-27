@@ -3,11 +3,13 @@
 #include <memory.h>
 #include <iterator>
 
+
 int main()
 {
 
 	{
 		bool passed = 0;
+
 		std::vector<char> data;
 		if (sfs::readEntireFile(data, RESOURCES_PATH "test1.txt") == sfs::noError)
 		{
@@ -191,7 +193,8 @@ int main()
 		if (data.setBool("bool", 1) != sfs::Errors::noError) { passed = 0; };
 		if (data.setInt("int", 69960000) != sfs::Errors::noError) { passed = 0; };
 		if (data.setString("str", "testString") != sfs::Errors::noError) { passed = 0; };
-		
+		if (data.setFloat("fl", 0.5) != sfs::Errors::noError) { passed = 0; };
+	
 		//if (sfs::safeSave(data, RESOURCES_PATH "test6", true) != sfs::noError) { passed = 0; };
 		//data = {};
 		//if (sfs::safeLoad(data, RESOURCES_PATH "test6", true) != sfs::noError) { passed = 0; };
@@ -238,6 +241,15 @@ int main()
 			{
 				passed = 0;
 			}
+		}
+
+		{
+			float read = 0;
+			if (data.getFloat("fl", read) != sfs::Errors::noError || read != 0.5)
+			{
+				passed = 0;
+			}
+
 		}
 
 		void *ptr = 0;
