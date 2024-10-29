@@ -10,7 +10,7 @@ Has other functionalities like file mappings (not working on linux yet).
 
 ---
 
-Integration: paste the include/safeSave.h file and the src/safeSvae.cpp file into your project.
+Integration: paste the include/safeSave.h file and the src/safeSave.cpp file into your project.
 
 ---
 
