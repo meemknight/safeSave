@@ -3,10 +3,10 @@
 ---
 
 Allows you to save data and don't worry if your save will get corupted. In the program is closed while the file is being saved the library will load the backup.
-If the original file has beed modified by the outside the library will load the backup. If both the backup and the original file are corupted the library will 
+If the original file has been modified, the library will load the backup. If both the backup and the original file are corrupted, the library will 
 report this error.
 
-Has other functionalities like file mappings (not working on linux yet).
+Has other functionalities like file mappings or a key-based dictionary (like a simplified JSON) where you can save data: SafeSafeKeyValueData
 
 ---
 
@@ -38,7 +38,7 @@ You can use
 ```
 to get the error string 
 
-This are the possible error codes:
+These are the possible error codes:
 ```cpp
 enum Errors : int
 	{
