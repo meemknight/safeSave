@@ -17,7 +17,7 @@ Integration: paste the include/safeSave.h file and the src/safeSave.cpp file int
 Basic Functions:
 
 ```cpp
-  //can return error: couldNotOpenFinle, 
+  	//can return error: couldNotOpenFinle, 
 	//	couldNotMakeBackup (if reportnotMakingBackupAsAnError is true, but will still save the first file)
 	Errors safeSave(const void* data, size_t size, const char* nameWithoutExtension, bool reportnotMakingBackupAsAnError);
 
@@ -42,12 +42,17 @@ This are the possible error codes:
 ```cpp
 enum Errors : int
 	{
-		noError,
+		noError = 0,
 		couldNotOpenFinle,
 		fileSizeDitNotMatch,
 		checkSumFailed,
 		couldNotMakeBackup,
 		readBackup,
+		warningEntryAlreadyExists,
+		entryNotFound,
+		entryHasDifferentDataType,
+		couldNotParseData,
+		fileSizeNotBigEnough,
 	};
 ```
 
@@ -56,12 +61,15 @@ enum Errors : int
 All Functions:
 
 ```cpp
- //can return error: couldNotOpenFinle
+ 	const char* getErrorString(Errors e);
+	
+	//can return error: couldNotOpenFinle
 	Errors readEntireFile(std::vector<char>& data, const char* name);
 	
 	//reades the content of a file (size bytes), if shouldMatchSize is false will read the entire fill untill size bytes are read or the entire file was read
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch
-	Errors readEntireFile(void* data, size_t size, const char* name, bool shouldMatchSize, int *bytesRead = nullptr);
+	Errors readEntireFile(void* data, size_t size, const char* name, bool shouldMatchSize,
+		int *bytesRead = nullptr);
 
 	//gets the file size
 	//can return error: couldNotOpenFinle
@@ -88,32 +96,61 @@ All Functions:
 	Errors writeEntireFile(const void*data, size_t size, const char* name);
 
 	//saved the data with a check sum and a backup
+	// It will also use a temporary file to make sure the saving is safe.
 	//can return error: couldNotOpenFinle, 
 	//	couldNotMakeBackup (if reportnotMakingBackupAsAnError is true, but will still save the first file)
 	Errors safeSave(const void* data, size_t size, const char* nameWithoutExtension, bool reportnotMakingBackupAsAnError);
 
+
+	//saved the data with a check sum. It will use a temporary file to make sure the saving is safe.
+	//can return error: couldNotOpenFinle
+	Errors safeSaveNoBackup(const void *data, size_t size, const char *nameWithoutExtension);
+
+
 	//loads the data that was saved using safeSave
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed, 
-	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
+	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)'
+	// is checkSumFailed is returned, the data was still read!
 	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension, bool reportLoadingBackupAsAnError);
 
 	//loads the data that was saved using safeSave and stored as a SafeSafeKeyValueData structure
 	//can return error: couldNotOpenFinle, checkSumFailed, fileSizeNotBigEnough
 	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
-	Errors safeLoad(std::vector<char> &data, const char *nameWithoutExtension, bool reportLoadingBackupAsAnError);
+	Errors safeLoad(std::vector<char> &data, const char *nameWithoutExtension, 
+		bool reportLoadingBackupAsAnError);
 
 	//same as safeLoad but only loads the backup file.
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed
 	Errors safeLoadBackup(void* data, size_t size, const char* nameWithoutExtension);
- 
- //saved the data stored as a SafeSafeKeyValueData structure in a binary format with a check sum and a backup
+
+	//saved the data stored as a SafeSafeKeyValueData structure in a binary format with a check sum and a backup
+	//Uses a temporary file to make sure the saving is safe
 	//can return error: couldNotOpenFinle, 
 	//	couldNotMakeBackup (if reportnotMakingBackupAsAnError is true, but will still save the first file)
 	Errors safeSave(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportnotMakingBackupAsAnError);
+
+
+	//saved the data stored as a SafeSafeKeyValueData structure in a binary format with a check.
+	//Uses a temporary file to make sure the saving is safe
+	//can return error: couldNotOpenFinle, 
+	Errors safeSaveNoBackup(SafeSafeKeyValueData &data, const char *nameWithoutExtension);
+
 
 	//loads the data that was saved using safeSave and stored as a SafeSafeKeyValueData structure
 	//can return error: couldNotOpenFinle, fileSizeNotBigEnough, checkSumFailed, couldNotParseData
 	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded from the backup)
 	Errors safeLoad(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportLoadingBackupAsAnError);
- 
+
+	//a file mapping maps the content of a file to ram
+	//can return error: couldNotOpenFinle
+	Errors openFileMapping(FileMapping& fileMapping, const char* name, size_t size, bool createIfNotExisting);
+
+	void closeFileMapping(FileMapping& fileMapping);
+
 ```
+
+
+
+
+
+
