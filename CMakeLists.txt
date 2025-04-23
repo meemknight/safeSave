@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 project(safeSave)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(safeSave)
 target_include_directories(safeSave PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")

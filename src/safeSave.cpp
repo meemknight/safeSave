@@ -2,11 +2,18 @@
 //do not remove this notice
 //(c) Luta Vlad
 // 
-// safeSave 1.0.1
+// safeSave 1.0.2
+// 
+// 
+// logs:
+// safeSave 1.0.2
+// added the temp file thing and also small updates like license
 // 
 ///////////////////////////////////////////
 
 #include <safeSave.h>
+#include <filesystem>
+#include <string>
 
 #if defined WIN32 || defined _WIN32 || defined __WIN32__ || defined __NT__
 #define NOMINMAX 
@@ -299,8 +306,9 @@ namespace sfs
 	{
 		std::string file1 = nameWithoutExtension; file1 += "1.bin";
 		std::string file2 = nameWithoutExtension; file2 += "2.bin";
+		std::string tmpFile = std::string(nameWithoutExtension) + "1.tmp";
 
-		auto err = writeEntireFileWithCheckSum((char*)data, size, file1.c_str());
+		auto err = writeEntireFileWithCheckSum((char*)data, size, tmpFile.c_str());
 
 		if (err == couldNotOpenFinle)
 		{
@@ -308,9 +316,17 @@ namespace sfs
 		}
 		else
 		{
-			auto err2 = writeEntireFileWithCheckSum((char*)data, size, file2.c_str());	
+			std::error_code renameError;
+			std::filesystem::rename(tmpFile, file1, renameError);
+			if (renameError)
+				return couldNotOpenFinle;
 
-			if (err2 == couldNotOpenFinle)
+			std::error_code errorCode;
+			std::filesystem::copy_file(file1, file2, 
+				std::filesystem::copy_options::overwrite_existing, errorCode);
+			//auto err2 = writeEntireFileWithCheckSum((char*)data, size, file2.c_str());	
+
+			if (errorCode.value())
 			{
 				if (reportnotMakingBackupAsAnError)
 				{
@@ -326,6 +342,29 @@ namespace sfs
 				return noError;
 			}
 		}
+	}
+
+	Errors safeSaveNoBackup(const void *data, size_t size, const char *nameWithoutExtension)
+	{
+		std::string file1 = nameWithoutExtension; file1 += "1.bin";
+		std::string tmpFile = std::string(nameWithoutExtension) + "1.tmp";
+
+		auto err = writeEntireFileWithCheckSum((char *)data, size, tmpFile.c_str());
+
+		if (err == couldNotOpenFinle)
+		{
+			return couldNotOpenFinle;
+		}
+		else
+		{
+			std::error_code renameError;
+			std::filesystem::rename(tmpFile, file1, renameError);
+			if (renameError)
+				return couldNotOpenFinle;
+
+			return noError;
+		}
+ 
 	}
 
 	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension, bool reportLoadingBackupAsAnError)
@@ -409,9 +448,16 @@ namespace sfs
 
 	Errors safeSave(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportnotMakingBackupAsAnError)
 	{
-		auto rez = data.formatIntoFileData();
+		auto rez = data.formatIntoFileDataBinary();
 
 		return safeSave(rez.data(), rez.size(), nameWithoutExtension, reportnotMakingBackupAsAnError);
+	}
+
+	Errors safeSaveNoBackup(SafeSafeKeyValueData &data, const char *nameWithoutExtension)
+	{
+		auto rez = data.formatIntoFileDataBinary();
+
+		return safeSaveNoBackup(rez.data(), rez.size(), nameWithoutExtension);
 	}
 
 	Errors safeLoad(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportLoadingBackupAsAnError)
@@ -805,10 +851,9 @@ namespace sfs
 		}
 	}
 
-	std::vector<char> SafeSafeKeyValueData::formatIntoFileData()
+	std::vector<char> sfs::SafeSafeKeyValueData::formatIntoFileDataBinary()
 	{
 		std::vector<char> ret;
-		ret.reserve(200);
 
 		size_t size = 0;
 		for (auto &e : entries)
@@ -875,6 +920,99 @@ namespace sfs
 
 		return ret;
 	}
+
+	/*
+	std::vector<char> SafeSafeKeyValueData::formatIntoFileDataTextBased()
+	{
+
+		std::vector<char> ret;
+
+		size_t size = 0;
+		for (auto &e : entries)
+		{
+			auto &s = e.first;
+			auto &d = e.second;
+
+			size += s.size() + 1; //name
+			size += d.data.size();
+			size += 10;
+		}
+
+		ret.reserve(size);
+
+		for (auto &e : entries)
+		{
+			auto &s = e.first;
+			auto &d = e.second;
+
+			for (auto c : s)
+			{
+				ret.push_back(c);
+			}
+			ret.push_back(':');
+			ret.push_back(' ');
+
+			if (d.type == Entry::Types::string_type)
+			{
+				
+				ret.push_back('\"');
+
+				for (auto d : d.data)
+				{
+					ret.push_back(d);
+				}
+				
+				ret.push_back('\"');
+				ret.push_back('\n');
+
+
+			}
+			else if (d.type == Entry::Types::rawData_type)
+			{
+				//todo
+
+			}
+			else if (d.type == Entry::Types::bool_type)
+			{
+				if (d.primitives.boolData)
+				{
+					ret.push_back('t');
+					ret.push_back('r');
+					ret.push_back('u');
+					ret.push_back('e');
+					ret.push_back('\n');
+				}
+				else
+				{
+					ret.push_back('f');
+					ret.push_back('a');
+					ret.push_back('l');
+					ret.push_back('s');
+					ret.push_back('e');
+					ret.push_back('\n');
+				}
+			}
+			else if (d.type == Entry::Types::int_type)
+			{
+				std::int32_t i = d.primitives.intData;
+				std::string str = std::to_string(i);
+				for (auto c : str) { ret.push_back(c); }
+				ret.push_back('\n');
+				
+			}
+			else if (d.type == Entry::Types::float_type)
+			{
+				float f = d.primitives.floatData;
+				std::string str = std::to_string(f);
+				for (auto c : str) { ret.push_back(c); }
+				ret.push_back('\n');
+			}
+
+		}
+
+		return ret;
+	}
+	*/
 
 	Errors SafeSafeKeyValueData::loadFromFileData(char *data, size_t size)
 	{

@@ -2,7 +2,7 @@
 //do not remove this notice
 //(c) Luta Vlad
 // 
-// safeSave 1.0.1
+// safeSave 1.0.2
 // 
 ///////////////////////////////////////////
 
@@ -67,13 +67,21 @@ namespace sfs
 	Errors writeEntireFile(const void*data, size_t size, const char* name);
 
 	//saved the data with a check sum and a backup
+	// It will also use a temporary file to make sure the saving is safe.
 	//can return error: couldNotOpenFinle, 
 	//	couldNotMakeBackup (if reportnotMakingBackupAsAnError is true, but will still save the first file)
 	Errors safeSave(const void* data, size_t size, const char* nameWithoutExtension, bool reportnotMakingBackupAsAnError);
 
+
+	//saved the data with a check sum. It will use a temporary file to make sure the saving is safe.
+	//can return error: couldNotOpenFinle
+	Errors safeSaveNoBackup(const void *data, size_t size, const char *nameWithoutExtension);
+
+
 	//loads the data that was saved using safeSave
 	//can return error: couldNotOpenFinle, fileSizeDitNotMatch, checkSumFailed, 
-	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)
+	//	readBackup (if reportLoadingBackupAsAnError but data will still be loaded with the backup)'
+	// is checkSumFailed is returned, the data was still read!
 	Errors safeLoad(void* data, size_t size, const char* nameWithoutExtension, bool reportLoadingBackupAsAnError);
 
 	//loads the data that was saved using safeSave and stored as a SafeSafeKeyValueData structure
@@ -154,16 +162,28 @@ namespace sfs
 		//can return error: entryNotFound, entryHasDifferentDataType
 		Errors getString(std::string at, std::string &s);
 
-		std::vector<char> formatIntoFileData();
+		std::vector<char> formatIntoFileDataBinary();
+
+		//not finished yet
+		//std::vector<char> formatIntoFileDataTextBased();
+
 
 		//can return error: couldNotParseData
 		Errors loadFromFileData(char *data, size_t size);
 	};
 	
 	//saved the data stored as a SafeSafeKeyValueData structure in a binary format with a check sum and a backup
+	//Uses a temporary file to make sure the saving is safe
 	//can return error: couldNotOpenFinle, 
 	//	couldNotMakeBackup (if reportnotMakingBackupAsAnError is true, but will still save the first file)
 	Errors safeSave(SafeSafeKeyValueData &data, const char *nameWithoutExtension, bool reportnotMakingBackupAsAnError);
+
+
+	//saved the data stored as a SafeSafeKeyValueData structure in a binary format with a check.
+	//Uses a temporary file to make sure the saving is safe
+	//can return error: couldNotOpenFinle, 
+	Errors safeSaveNoBackup(SafeSafeKeyValueData &data, const char *nameWithoutExtension);
+
 
 	//loads the data that was saved using safeSave and stored as a SafeSafeKeyValueData structure
 	//can return error: couldNotOpenFinle, fileSizeNotBigEnough, checkSumFailed, couldNotParseData

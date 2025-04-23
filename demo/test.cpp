@@ -3,7 +3,6 @@
 #include <memory.h>
 #include <iterator>
 
-
 int main()
 {
 
@@ -48,6 +47,7 @@ int main()
 	};
 
 	{
+
 		bool passed = 0;
 		Test a, b;
 
@@ -199,7 +199,7 @@ int main()
 		//data = {};
 		//if (sfs::safeLoad(data, RESOURCES_PATH "test6", true) != sfs::noError) { passed = 0; };
 
-		auto binary = data.formatIntoFileData();
+		auto binary = data.formatIntoFileDataBinary();
 		data = {};
 		data.loadFromFileData(&binary[0], binary.size());
 
@@ -396,6 +396,21 @@ int main()
 		{
 			std::cout << "test 9: didn't pass\n";
 		}
+	}
+
+	{
+		//sfs::SafeSafeKeyValueData data;
+		//
+		//data.setInt("intTest", 10);
+		//data.setFloat("float test", 10.f);
+		//data.setBool("yes", true);
+		//data.setBool("no", false);
+		//data.setString("str", "string tests");
+		//
+		//auto rez = data.formatIntoFileDataTextBased();
+		//
+		//sfs::writeEntireFile(rez, RESOURCES_PATH "test10.txt");
+
 	}
 
 	std::cin.get();
