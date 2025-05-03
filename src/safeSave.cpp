@@ -2,13 +2,19 @@
 //do not remove this notice
 //(c) Luta Vlad
 // 
-// safeSave 1.0.2
+// safeSave 1.0.3
 // 
 // 
 // logs:
 // safeSave 1.0.2
 // added the temp file thing and also small updates like license
 // 
+// safeSave 1.0.3
+// added the uint64 and int64 types to key value pair
+// 
+// safeSave 1.0.4
+// added the ability to easily store a key value pare inside itself, easy nesting data!
+//  + initializer list constructor!
 ///////////////////////////////////////////
 
 #include <safeSave.h>
@@ -587,6 +593,24 @@ namespace sfs
 
 #endif	
 
+	bool SafeSafeKeyValueData::operator==(const SafeSafeKeyValueData &other) const
+	{
+
+		if (entries.size() != other.entries.size()) { return false; }
+
+		for (const auto &e : entries)
+		{
+
+			const auto found = other.entries.find(e.first);
+			if (found == other.entries.end()) { return false; }
+
+			if (e.second != found->second) { return false; }
+
+		}
+
+		return true;
+	}
+
 	bool SafeSafeKeyValueData::entryExists(std::string at)
 	{
 		return entries.find(at) != entries.end();
@@ -656,6 +680,166 @@ namespace sfs
 		}
 	}
 
+	Errors SafeSafeKeyValueData::setuInt64(std::string at, uint64_t i)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::uint64_type;
+			it->second.data.clear();
+			it->second.primitives.uint64Data = i;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::uint64_type;
+			e.primitives.uint64Data = i;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getuInt64(std::string at, uint64_t &i)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::uint64_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				i = it->second.primitives.uint64Data;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setInt64(std::string at, int64_t i)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::int64_type;
+			it->second.data.clear();
+			it->second.primitives.int64Data = i;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::int64_type;
+			e.primitives.int64Data = i;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getInt64(std::string at, int64_t &i)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::int64_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				i = it->second.primitives.int64Data;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setKeyValueData(std::string at, const SafeSafeKeyValueData &data)
+	{
+
+		auto binaryData = data.formatIntoFileDataBinary();
+
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::keyValueData_type;
+			it->second.data.clear();
+			it->second.data.resize(binaryData.size());
+
+			if(binaryData.size())
+				memcpy(it->second.data.data(), binaryData.data(), binaryData.size());
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+			e.type = Entry::Types::keyValueData_type;
+			e.data.resize(binaryData.size());
+
+			if (binaryData.size())
+				memcpy(e.data.data(), binaryData.data(), binaryData.size());
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getKeyValueData(std::string at, SafeSafeKeyValueData &data)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::keyValueData_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				size_t size = it->second.data.size();
+				void* binaryData = it->second.data.data();
+
+				data = {};
+				auto readingData = data.loadFromFileData((char*)binaryData, size);
+
+				if (readingData != Errors::noError)
+				{
+					return readingData;
+				}
+
+				return Errors::noError;
+			}
+
+		}
+
+	}
 
 	Errors SafeSafeKeyValueData::getRawDataPointer(std::string at, void *&data, size_t &size)
 	{
@@ -851,7 +1035,7 @@ namespace sfs
 		}
 	}
 
-	std::vector<char> sfs::SafeSafeKeyValueData::formatIntoFileDataBinary()
+	std::vector<char> sfs::SafeSafeKeyValueData::formatIntoFileDataBinary() const
 	{
 		std::vector<char> ret;
 
@@ -914,6 +1098,30 @@ namespace sfs
 				ret.push_back(((char *)(&f))[1]);
 				ret.push_back(((char *)(&f))[2]);
 				ret.push_back(((char *)(&f))[3]);
+			}
+			else if (d.type == Entry::Types::uint64_type)
+			{
+				auto i = d.primitives.uint64Data;
+				ret.push_back(((char *)(&i))[0]);
+				ret.push_back(((char *)(&i))[1]);
+				ret.push_back(((char *)(&i))[2]);
+				ret.push_back(((char *)(&i))[3]);
+				ret.push_back(((char *)(&i))[4]);
+				ret.push_back(((char *)(&i))[5]);
+				ret.push_back(((char *)(&i))[6]);
+				ret.push_back(((char *)(&i))[7]);
+			}
+			else if (d.type == Entry::Types::int64_type)
+			{
+				auto i = d.primitives.int64Data;
+				ret.push_back(((char *)(&i))[0]);
+				ret.push_back(((char *)(&i))[1]);
+				ret.push_back(((char *)(&i))[2]);
+				ret.push_back(((char *)(&i))[3]);
+				ret.push_back(((char *)(&i))[4]);
+				ret.push_back(((char *)(&i))[5]);
+				ret.push_back(((char *)(&i))[6]);
+				ret.push_back(((char *)(&i))[7]);
 			}
 
 		}
@@ -1087,6 +1295,60 @@ namespace sfs
 
 					entries[currentName] = e;
 				}
+				else if (type == Entry::Types::uint64_type)
+				{
+					std::uint64_t i = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[3] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[4] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[5] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[6] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[7] = *c;
+
+					Entry e;
+					e.type = Entry::Types::uint64_type;
+					e.primitives.uint64Data = i;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::int64_type)
+				{
+					std::int64_t i = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[3] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[4] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[5] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[6] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[7] = *c;
+
+					Entry e;
+					e.type = Entry::Types::int64_type;
+					e.primitives.int64Data = i;
+
+					entries[currentName] = e;
+				}
 				else if (type == Entry::Types::rawData_type)
 				{
 					size_t s = 0;
@@ -1155,5 +1417,27 @@ namespace sfs
 
 	}
 
+
+	bool SafeSafeKeyValueData::Entry::operator==(const Entry &other) const
+	{
+		if (type != other.type) { return false; }
+
+		switch (type)
+		{
+			case no_type: { break; }
+			case rawData_type: { if (data != other.data) { return false; } break; }
+			case int_type: { if (primitives.intData != other.primitives.intData) { return false; } break; }
+			case float_type:{ if (primitives.floatData != other.primitives.floatData) { return false; } break;}
+			case bool_type:{ if (primitives.boolData != other.primitives.boolData) { return false; } break;}
+			case string_type:{ if (data != other.data) { return false; } break;}
+			case uint64_type:{ if(primitives.uint64Data != other.primitives.uint64Data) { return false; } break;}
+			case int64_type: { if (primitives.int64Data != other.primitives.int64Data) { return false; } break;}
+			case keyValueData_type: { if (data != other.data) { return false; } break;}
+
+		}
+
+
+		return true;
+	}
 
 }

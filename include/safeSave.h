@@ -2,7 +2,7 @@
 //do not remove this notice
 //(c) Luta Vlad
 // 
-// safeSave 1.0.2
+// safeSave 1.0.4
 // 
 ///////////////////////////////////////////
 
@@ -10,6 +10,7 @@
 #include <fstream>
 #include <vector>
 #include <unordered_map>
+#include <initializer_list>
 
 #ifdef _MSC_VER
 #pragma warning( disable : 26812 )
@@ -108,19 +109,65 @@ namespace sfs
 				float_type,
 				bool_type,
 				string_type,
+				uint64_type,
+				int64_type,
+				keyValueData_type
+
 			};
 
 			std::vector<char> data;
 			char type = 0;
 			union Primitives
 			{
+				std::uint64_t uint64Data = 0;
+				std::int64_t int64Data;
 				std::int32_t intData;
 				float floatData;
 				bool boolData;
 			}primitives;
+
+			bool operator== (const Entry &other) const;
+
+			bool operator!= (const Entry &other) const
+			{
+				return !(*this == other);
+			}
+
+			// Implicit constructors for primitive types
+			Entry() = default;
+			Entry(int v) { type = int_type; primitives.intData = v; }
+			Entry(float v) { type = float_type; primitives.floatData = v; }
+			Entry(bool v) { type = bool_type; primitives.boolData = v; }
+			Entry(std::int64_t v) { type = int64_type; primitives.int64Data = v; }
+			Entry(std::uint64_t v) { type = uint64_type; primitives.uint64Data = v; }
+			Entry(const std::string &v)
+			{
+				type = string_type;
+				data.assign(v.begin(), v.end());
+			}
+			Entry(const char *v): Entry(std::string(v)) {}
+
 		};
 
+		SafeSafeKeyValueData() = default;
+
+		SafeSafeKeyValueData(std::initializer_list<std::pair<std::string, Entry>> init)
+		{
+			for (const auto &pair : init)
+			{
+				entries[pair.first] = pair.second;
+			}
+		}
+
 		std::unordered_map<std::string, Entry> entries;
+
+		bool operator== (const SafeSafeKeyValueData & other) const;
+
+		bool operator!= (const SafeSafeKeyValueData &other) const
+		{
+			return !(*this == other);
+		}
+
 
 		//returns true if entry exists
 		bool entryExists(std::string at);
@@ -131,6 +178,14 @@ namespace sfs
 		//can return error: warningEntryAlreadyExists, if so it will overwrite data
 		Errors setRawData(std::string at, void *data, size_t size);
 
+		//this can be usefull to hold nested key value data objects in one another!
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setKeyValueData(std::string at, const SafeSafeKeyValueData &data);
+
+		//won't change data if failed
+		//can return error: entryNotFound, entryHasDifferentDataType, couldNotParseData
+		Errors getKeyValueData(std::string at, SafeSafeKeyValueData &data);
+
 		//can return error: entryNotFound, entryHasDifferentDataType
 		Errors getRawDataPointer(std::string at, void* &data, size_t &size);
 
@@ -140,6 +195,20 @@ namespace sfs
 
 		//can return error: warningEntryAlreadyExists, if so it will overwrite data
 		Errors setInt(std::string at, int32_t i);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setuInt64(std::string at, uint64_t i);
+
+		//won't change i if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getuInt64(std::string at, uint64_t &i);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setInt64(std::string at, int64_t i);
+
+		//won't change i if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getInt64(std::string at, int64_t &i);
 
 		//won't change f if failed
 		//can return error: entryNotFound, entryHasDifferentDataType
@@ -162,7 +231,7 @@ namespace sfs
 		//can return error: entryNotFound, entryHasDifferentDataType
 		Errors getString(std::string at, std::string &s);
 
-		std::vector<char> formatIntoFileDataBinary();
+		std::vector<char> formatIntoFileDataBinary() const;
 
 		//not finished yet
 		//std::vector<char> formatIntoFileDataTextBased();
