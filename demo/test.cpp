@@ -568,7 +568,6 @@ int main()
 
 		sfs::SafeSafeKeyValueData data =
 		{
-			{"vec2", {10.f, 57.f}},
 			{"vec3", {3.f, 7.f, 999999999.f}},
 			{"vec4", {2.f, 5.f, 10.9999f, 11.f}},
 			{"vec4_", {0.f, 0.f, 0.f, 0.f}},
@@ -580,6 +579,7 @@ int main()
 			{"uint", (unsigned int)15},
 		};
 
+		data.setVec2("vec2", 10.f, 57.f);
 
 		auto dataBinary = data.formatIntoFileDataBinary();
 		sfs::SafeSafeKeyValueData data2;

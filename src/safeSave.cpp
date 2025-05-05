@@ -799,8 +799,8 @@ namespace sfs
 			Entry e = {};
 
 			e.type = Entry::Types::vec2_type;
-			it->second.primitives.vec.x = x;
-			it->second.primitives.vec.y = y;
+			e.primitives.vec.x = x;
+			e.primitives.vec.y = y;
 
 			entries.insert({at, std::move(e)});
 
@@ -827,9 +827,9 @@ namespace sfs
 			Entry e = {};
 
 			e.type = Entry::Types::vec3_type;
-			it->second.primitives.vec.x = x;
-			it->second.primitives.vec.y = y;
-			it->second.primitives.vec.z = z;
+			e.primitives.vec.x = x;
+			e.primitives.vec.y = y;
+			e.primitives.vec.z = z;
 
 			entries.insert({at, std::move(e)});
 
@@ -857,10 +857,10 @@ namespace sfs
 			Entry e = {};
 
 			e.type = Entry::Types::vec4_type;
-			it->second.primitives.vec.x = x;
-			it->second.primitives.vec.y = y;
-			it->second.primitives.vec.z = z;
-			it->second.primitives.vec.w = w;
+			e.primitives.vec.x = x;
+			e.primitives.vec.y = y;
+			e.primitives.vec.z = z;
+			e.primitives.vec.w = w;
 
 			entries.insert({at, std::move(e)});
 
@@ -886,8 +886,8 @@ namespace sfs
 			Entry e = {};
 
 			e.type = Entry::Types::ivec2_type;
-			it->second.primitives.ivec.x = x;
-			it->second.primitives.ivec.y = y;
+			e.primitives.ivec.x = x;
+			e.primitives.ivec.y = y;
 
 			entries.insert({at, std::move(e)});
 
@@ -914,9 +914,9 @@ namespace sfs
 			Entry e = {};
 
 			e.type = Entry::Types::ivec3_type;
-			it->second.primitives.ivec.x = x;
-			it->second.primitives.ivec.y = y;
-			it->second.primitives.ivec.z = z;
+			e.primitives.ivec.x = x;
+			e.primitives.ivec.y = y;
+			e.primitives.ivec.z = z;
 
 			entries.insert({at, std::move(e)});
 
@@ -944,10 +944,10 @@ namespace sfs
 			Entry e = {};
 
 			e.type = Entry::Types::ivec4_type;
-			it->second.primitives.ivec.x = x;
-			it->second.primitives.ivec.y = y;
-			it->second.primitives.ivec.z = z;
-			it->second.primitives.ivec.w = w;
+			e.primitives.ivec.x = x;
+			e.primitives.ivec.y = y;
+			e.primitives.ivec.z = z;
+			e.primitives.ivec.w = w;
 
 			entries.insert({at, std::move(e)});
 
