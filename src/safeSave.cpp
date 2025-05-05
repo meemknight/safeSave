@@ -15,6 +15,7 @@
 // safeSave 1.0.4
 // added the ability to easily store a key value pare inside itself, easy nesting data!
 //  + initializer list constructor!
+// new data types like vector types!
 ///////////////////////////////////////////
 
 #include <safeSave.h>
@@ -680,6 +681,280 @@ namespace sfs
 		}
 	}
 
+	Errors SafeSafeKeyValueData::setChar(std::string at, char c)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::char_type;
+			it->second.data.clear();
+			it->second.primitives.charData = c;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::char_type;
+			e.primitives.charData = c;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setUCHar(std::string at, unsigned char c)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::uchar_type;
+			it->second.data.clear();
+			it->second.primitives.uCharData = c;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::uchar_type;
+			e.primitives.uCharData = c;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setUInt(std::string at, uint32_t u)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::uint_type;
+			it->second.data.clear();
+			it->second.primitives.uintData = u;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::uint_type;
+			e.primitives.uintData = u;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setDouble(std::string at, double d)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::double_type;
+			it->second.data.clear();
+			it->second.primitives.doubleData = d;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::double_type;
+			e.primitives.doubleData = d;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setVec2(std::string at, float x, float y)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::vec2_type;
+			it->second.data.clear();
+			it->second.primitives.vec.x = x;
+			it->second.primitives.vec.y = y;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::vec2_type;
+			it->second.primitives.vec.x = x;
+			it->second.primitives.vec.y = y;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setVec3(std::string at, float x, float y, float z)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::vec3_type;
+			it->second.data.clear();
+			it->second.primitives.vec.x = x;
+			it->second.primitives.vec.y = y;
+			it->second.primitives.vec.z = z;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::vec3_type;
+			it->second.primitives.vec.x = x;
+			it->second.primitives.vec.y = y;
+			it->second.primitives.vec.z = z;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setVec4(std::string at, float x, float y, float z, float w)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::vec4_type;
+			it->second.data.clear();
+			it->second.primitives.vec.x = x;
+			it->second.primitives.vec.y = y;
+			it->second.primitives.vec.z = z;
+			it->second.primitives.vec.w = w;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::vec4_type;
+			it->second.primitives.vec.x = x;
+			it->second.primitives.vec.y = y;
+			it->second.primitives.vec.z = z;
+			it->second.primitives.vec.w = w;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setIVec2(std::string at, int x, int y)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::ivec2_type;
+			it->second.data.clear();
+			it->second.primitives.ivec.x = x;
+			it->second.primitives.ivec.y = y;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::ivec2_type;
+			it->second.primitives.ivec.x = x;
+			it->second.primitives.ivec.y = y;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setIVec3(std::string at, int x, int y, int z)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::ivec3_type;
+			it->second.data.clear();
+			it->second.primitives.ivec.x = x;
+			it->second.primitives.ivec.y = y;
+			it->second.primitives.ivec.z = z;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::ivec3_type;
+			it->second.primitives.ivec.x = x;
+			it->second.primitives.ivec.y = y;
+			it->second.primitives.ivec.z = z;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
+	Errors SafeSafeKeyValueData::setIVec4(std::string at, int x, int y, int z, int w)
+	{
+		auto it = entries.find(at);
+
+		if (it != entries.end())
+		{
+			it->second.type = Entry::Types::ivec4_type;
+			it->second.data.clear();
+			it->second.primitives.ivec.x = x;
+			it->second.primitives.ivec.y = y;
+			it->second.primitives.ivec.z = z;
+			it->second.primitives.ivec.w = w;
+
+			return Errors::warningEntryAlreadyExists;
+		}
+		else
+		{
+			Entry e = {};
+
+			e.type = Entry::Types::ivec4_type;
+			it->second.primitives.ivec.x = x;
+			it->second.primitives.ivec.y = y;
+			it->second.primitives.ivec.z = z;
+			it->second.primitives.ivec.w = w;
+
+			entries.insert({at, std::move(e)});
+
+			return Errors::noError;
+		}
+	}
+
 	Errors SafeSafeKeyValueData::setuInt64(std::string at, uint64_t i)
 	{
 		auto it = entries.find(at);
@@ -937,6 +1212,94 @@ namespace sfs
 		}
 	}
 
+	Errors SafeSafeKeyValueData::getChar(std::string at, char &c)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::char_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				c = it->second.primitives.charData;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getUChar(std::string at, unsigned char &c)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::uchar_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				c = it->second.primitives.uCharData;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getUInt(std::string at, unsigned int &u)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::uint_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				u = it->second.primitives.uintData;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getDobule(std::string at, double &d)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::double_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				d = it->second.primitives.doubleData;
+				return Errors::noError;
+			}
+		}
+	}
+
 	Errors SafeSafeKeyValueData::getBool(std::string at, bool &b)
 	{
 		auto it = entries.find(at);
@@ -1066,7 +1429,9 @@ namespace sfs
 
 			ret.push_back(d.type);
 			
-			if (d.type == Entry::Types::rawData_type || d.type == Entry::Types::string_type)
+			if (d.type == Entry::Types::rawData_type || d.type == Entry::Types::string_type
+				|| d.type == Entry::Types::keyValueData_type
+				)
 			{
 				size_t size = d.data.size();
 				ret.push_back(((char *)(&size))[0]);
@@ -1123,6 +1488,145 @@ namespace sfs
 				ret.push_back(((char *)(&i))[6]);
 				ret.push_back(((char *)(&i))[7]);
 			}
+			else if (d.type == Entry::Types::double_type)
+			{
+				auto i = d.primitives.doubleData;
+				ret.push_back(((char *)(&i))[0]);
+				ret.push_back(((char *)(&i))[1]);
+				ret.push_back(((char *)(&i))[2]);
+				ret.push_back(((char *)(&i))[3]);
+				ret.push_back(((char *)(&i))[4]);
+				ret.push_back(((char *)(&i))[5]);
+				ret.push_back(((char *)(&i))[6]);
+				ret.push_back(((char *)(&i))[7]);
+			}
+			else if (d.type == Entry::Types::char_type)
+			{
+				auto i = d.primitives.charData;
+				ret.push_back(((char *)(&i))[0]);
+			}
+			else if (d.type == Entry::Types::uchar_type)
+			{
+				auto i = d.primitives.uCharData;
+				ret.push_back(((char *)(&i))[0]);
+			}
+			else if (d.type == Entry::Types::uint_type)
+			{
+				auto i = d.primitives.uintData;
+				ret.push_back(((char *)(&i))[0]);
+				ret.push_back(((char *)(&i))[1]);
+				ret.push_back(((char *)(&i))[2]);
+				ret.push_back(((char *)(&i))[3]);
+			}
+			else if (d.type == Entry::Types::vec2_type)
+			{
+				auto vec = d.primitives.vec;
+				ret.push_back(((char *)(&vec.x))[0]);
+				ret.push_back(((char *)(&vec.x))[1]);
+				ret.push_back(((char *)(&vec.x))[2]);
+				ret.push_back(((char *)(&vec.x))[3]);
+
+				ret.push_back(((char *)(&vec.y))[0]);
+				ret.push_back(((char *)(&vec.y))[1]);
+				ret.push_back(((char *)(&vec.y))[2]);
+				ret.push_back(((char *)(&vec.y))[3]);
+			}
+			else if (d.type == Entry::Types::vec3_type)
+			{
+				auto vec = d.primitives.vec;
+				ret.push_back(((char *)(&vec.x))[0]);
+				ret.push_back(((char *)(&vec.x))[1]);
+				ret.push_back(((char *)(&vec.x))[2]);
+				ret.push_back(((char *)(&vec.x))[3]);
+
+				ret.push_back(((char *)(&vec.y))[0]);
+				ret.push_back(((char *)(&vec.y))[1]);
+				ret.push_back(((char *)(&vec.y))[2]);
+				ret.push_back(((char *)(&vec.y))[3]);
+
+				ret.push_back(((char *)(&vec.z))[0]);
+				ret.push_back(((char *)(&vec.z))[1]);
+				ret.push_back(((char *)(&vec.z))[2]);
+				ret.push_back(((char *)(&vec.z))[3]);
+			}
+			else if (d.type == Entry::Types::vec4_type)
+			{
+				auto vec = d.primitives.vec;
+				ret.push_back(((char *)(&vec.x))[0]);
+				ret.push_back(((char *)(&vec.x))[1]);
+				ret.push_back(((char *)(&vec.x))[2]);
+				ret.push_back(((char *)(&vec.x))[3]);
+
+				ret.push_back(((char *)(&vec.y))[0]);
+				ret.push_back(((char *)(&vec.y))[1]);
+				ret.push_back(((char *)(&vec.y))[2]);
+				ret.push_back(((char *)(&vec.y))[3]);
+
+				ret.push_back(((char *)(&vec.z))[0]);
+				ret.push_back(((char *)(&vec.z))[1]);
+				ret.push_back(((char *)(&vec.z))[2]);
+				ret.push_back(((char *)(&vec.z))[3]);
+
+				ret.push_back(((char *)(&vec.w))[0]);
+				ret.push_back(((char *)(&vec.w))[1]);
+				ret.push_back(((char *)(&vec.w))[2]);
+				ret.push_back(((char *)(&vec.w))[3]);
+			}
+			else if (d.type == Entry::Types::ivec2_type)
+			{
+				auto vec = d.primitives.ivec;
+				ret.push_back(((char *)(&vec.x))[0]);
+				ret.push_back(((char *)(&vec.x))[1]);
+				ret.push_back(((char *)(&vec.x))[2]);
+				ret.push_back(((char *)(&vec.x))[3]);
+
+				ret.push_back(((char *)(&vec.y))[0]);
+				ret.push_back(((char *)(&vec.y))[1]);
+				ret.push_back(((char *)(&vec.y))[2]);
+				ret.push_back(((char *)(&vec.y))[3]);
+			}
+			else if (d.type == Entry::Types::ivec3_type)
+			{
+				auto vec = d.primitives.ivec;
+				ret.push_back(((char *)(&vec.x))[0]);
+				ret.push_back(((char *)(&vec.x))[1]);
+				ret.push_back(((char *)(&vec.x))[2]);
+				ret.push_back(((char *)(&vec.x))[3]);
+
+				ret.push_back(((char *)(&vec.y))[0]);
+				ret.push_back(((char *)(&vec.y))[1]);
+				ret.push_back(((char *)(&vec.y))[2]);
+				ret.push_back(((char *)(&vec.y))[3]);
+
+				ret.push_back(((char *)(&vec.z))[0]);
+				ret.push_back(((char *)(&vec.z))[1]);
+				ret.push_back(((char *)(&vec.z))[2]);
+				ret.push_back(((char *)(&vec.z))[3]);
+			}
+			else if (d.type == Entry::Types::ivec4_type)
+			{
+				auto vec = d.primitives.ivec;
+				ret.push_back(((char *)(&vec.x))[0]);
+				ret.push_back(((char *)(&vec.x))[1]);
+				ret.push_back(((char *)(&vec.x))[2]);
+				ret.push_back(((char *)(&vec.x))[3]);
+
+				ret.push_back(((char *)(&vec.y))[0]);
+				ret.push_back(((char *)(&vec.y))[1]);
+				ret.push_back(((char *)(&vec.y))[2]);
+				ret.push_back(((char *)(&vec.y))[3]);
+
+				ret.push_back(((char *)(&vec.z))[0]);
+				ret.push_back(((char *)(&vec.z))[1]);
+				ret.push_back(((char *)(&vec.z))[2]);
+				ret.push_back(((char *)(&vec.z))[3]);
+
+				ret.push_back(((char *)(&vec.w))[0]);
+				ret.push_back(((char *)(&vec.w))[1]);
+				ret.push_back(((char *)(&vec.w))[2]);
+				ret.push_back(((char *)(&vec.w))[3]);
+			}
+
 
 		}
 
@@ -1349,6 +1853,78 @@ namespace sfs
 
 					entries[currentName] = e;
 				}
+				else if (type == Entry::Types::double_type)
+				{
+					double i = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[3] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[4] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[5] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[6] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[7] = *c;
+
+					Entry e;
+					e.type = Entry::Types::double_type;
+					e.primitives.doubleData = i;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::uint_type)
+				{
+					std::uint32_t i = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::uint_type;
+					e.primitives.uintData = i;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::char_type)
+				{
+					char i = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[0] = *c;
+
+					Entry e;
+					e.type = Entry::Types::char_type;
+					e.primitives.charData = i;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::uchar_type)
+				{
+					char i = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&i))[0] = *c;
+
+					Entry e;
+					e.type = Entry::Types::uchar_type;
+					e.primitives.uCharData = i;
+
+					entries[currentName] = e;
+				}
 				else if (type == Entry::Types::rawData_type)
 				{
 					size_t s = 0;
@@ -1398,7 +1974,284 @@ namespace sfs
 					}
 
 					entries[currentName] = std::move(e);
+				}
+				else if (type == Entry::Types::keyValueData_type)
+				{
+					size_t s = 0;
 
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&s))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&s))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&s))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&s))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::keyValueData_type;
+					e.data.reserve(s);
+
+					for (int i = 0; i < s; i++)
+					{
+						c++; if (c >= data + size) { return Errors::couldNotParseData; }
+						e.data.push_back(*c);
+					}
+
+					entries[currentName] = std::move(e);
+
+					}
+				else if (type == Entry::Types::vec2_type)
+				{
+					float x = 0;
+					float y = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::vec2_type;
+					e.primitives.vec.x = x;
+					e.primitives.vec.y = y;
+					e.primitives.vec.z = 0;
+					e.primitives.vec.w = 0;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::vec3_type)
+				{
+					float x = 0;
+					float y = 0;
+					float z = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::vec3_type;
+					e.primitives.vec.x = x;
+					e.primitives.vec.y = y;
+					e.primitives.vec.z = z;
+					e.primitives.vec.w = 0;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::vec4_type)
+				{
+					float x = 0;
+					float y = 0;
+					float z = 0;
+					float w = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&w))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&w))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&w))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&w))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::vec4_type;
+					e.primitives.vec.x = x;
+					e.primitives.vec.y = y;
+					e.primitives.vec.z = z;
+					e.primitives.vec.w = w;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::ivec2_type)
+				{
+					int x = 0;
+					int y = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::ivec2_type;
+					e.primitives.ivec.x = x;
+					e.primitives.ivec.y = y;
+					e.primitives.ivec.z = 0;
+					e.primitives.ivec.w = 0;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::ivec3_type)
+				{
+					int x = 0;
+					int y = 0;
+					int z = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::ivec3_type;
+					e.primitives.ivec.x = x;
+					e.primitives.ivec.y = y;
+					e.primitives.ivec.z = z;
+					e.primitives.ivec.w = 0;
+
+					entries[currentName] = e;
+				}
+				else if (type == Entry::Types::ivec4_type)
+				{
+					int x = 0;
+					int y = 0;
+					int z = 0;
+					int w = 0;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&x))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&y))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&z))[3] = *c;
+
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&w))[0] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&w))[1] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&w))[2] = *c;
+					c++; if (c >= data + size) { return Errors::couldNotParseData; }
+					((char *)(&w))[3] = *c;
+
+					Entry e;
+					e.type = Entry::Types::ivec4_type;
+					e.primitives.ivec.x = x;
+					e.primitives.ivec.y = y;
+					e.primitives.ivec.z = z;
+					e.primitives.ivec.w = w;
+
+					entries[currentName] = e;
 				}
 
 				currentName = {};
@@ -1433,6 +2286,19 @@ namespace sfs
 			case uint64_type:{ if(primitives.uint64Data != other.primitives.uint64Data) { return false; } break;}
 			case int64_type: { if (primitives.int64Data != other.primitives.int64Data) { return false; } break;}
 			case keyValueData_type: { if (data != other.data) { return false; } break;}
+			
+			case char_type: { if (primitives.charData != other.primitives.charData) { return false; } break; }
+			case uchar_type: { if (primitives.uCharData != other.primitives.uCharData) { return false; } break; }
+			case uint_type: { if (primitives.uintData != other.primitives.uintData) { return false; } break; }
+			case double_type: { if (primitives.doubleData != other.primitives.doubleData) { return false; } break; }
+		
+			case vec2_type: { if (primitives.vec.x != primitives.vec.x || primitives.vec.y != primitives.vec.y) { return false; } break; }
+			case vec3_type: { if (primitives.vec.x != primitives.vec.x || primitives.vec.y != primitives.vec.y || primitives.vec.z != primitives.vec.z) { return false; } break; }
+			case vec4_type: { if (primitives.vec.x != primitives.vec.x || primitives.vec.y != primitives.vec.y || primitives.vec.z != primitives.vec.z || primitives.vec.w != primitives.vec.w) { return false; } break; }
+
+			case ivec2_type: { if (primitives.ivec.x != primitives.ivec.x || primitives.ivec.y != primitives.ivec.y) { return false; } break; }
+			case ivec3_type: { if (primitives.ivec.x != primitives.ivec.x || primitives.ivec.y != primitives.ivec.y || primitives.ivec.z != primitives.ivec.z) { return false; } break; }
+			case ivec4_type: { if (primitives.ivec.x != primitives.ivec.x || primitives.ivec.y != primitives.ivec.y || primitives.ivec.z != primitives.ivec.z || primitives.ivec.w != primitives.ivec.w) { return false; } break; }
 
 		}
 

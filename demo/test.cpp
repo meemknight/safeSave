@@ -443,7 +443,7 @@ int main()
 
 		void *ptr = 0;
 		size_t s = 0;
-		data.getRawDataPointer("test1", ptr, s);
+		data2.getRawDataPointer("test1", ptr, s);
 		Test read = {};
 		if (s != sizeof(Test) || ptr == 0)
 		{
@@ -459,7 +459,7 @@ int main()
 
 		{
 			int i = 0;
-			if (data.getInt("intTest", i) != sfs::Errors::noError || i != 10)
+			if (data2.getInt("intTest", i) != sfs::Errors::noError || i != 10)
 			{
 				passed = 0;
 			}
@@ -467,7 +467,7 @@ int main()
 
 		{
 			float i = 0;
-			if (data.getFloat("floatTest", i) != sfs::Errors::noError || i != 3.14f)
+			if (data2.getFloat("floatTest", i) != sfs::Errors::noError || i != 3.14f)
 			{
 				passed = 0;
 			}
@@ -476,7 +476,7 @@ int main()
 		{
 			sfs::SafeSafeKeyValueData subData2 = {};
 
-			if (data.getKeyValueData("subData", subData2) != sfs::Errors::noError || subData != subData2)
+			if (data2.getKeyValueData("subData", subData2) != sfs::Errors::noError || subData != subData2)
 			{
 				passed = 0;
 			}
@@ -535,6 +535,7 @@ int main()
 		{
 			{"name", "John"},
 			{"age", 30},
+			{"negative", -30},
 			{"height", 1.82f},
 			{"is_alive", true},
 			{"id", std::uint64_t(123456789)}
@@ -544,6 +545,7 @@ int main()
 
 		obj2.setString("name", "John");
 		obj2.setInt("age", 30);
+		obj2.setInt("negative", -30);
 		obj2.setFloat("height", 1.82f);
 		obj2.setBool("is_alive", true);
 		obj2.setuInt64("id", 123456789);
@@ -560,6 +562,51 @@ int main()
 		}
 	}
 
+	{
+		bool passed = true;
+
+
+		sfs::SafeSafeKeyValueData data =
+		{
+			{"vec2", {10.f, 57.f}},
+			{"vec3", {3.f, 7.f, 999999999.f}},
+			{"vec4", {2.f, 5.f, 10.9999f, 11.f}},
+			{"vec4_", {0.f, 0.f, 0.f, 0.f}},
+			{"ivec2", {10, 57}},
+			{"ivec3", {3, 7, 999999999}},
+			{"ivec4", {2, 5, 10, 11}},
+			{"ivec4_", {0, 0, 0, 0}},
+			{"double", 60.0},
+			{"uint", (unsigned int)15},
+		};
+
+
+		auto dataBinary = data.formatIntoFileDataBinary();
+		sfs::SafeSafeKeyValueData data2;
+		data2.loadFromFileData(dataBinary.data(), dataBinary.size());
+
+
+		if (data != data2)
+		{
+			passed = false;
+		}
+
+		data2.setIVec2("vec2", 10, 56);
+
+		if (data == data2)
+		{
+			passed = false;
+		}
+
+		if (passed)
+		{
+			std::cout << "test 13: passed\n";
+		}
+		else
+		{
+			std::cout << "test 13: didn't pass\n";
+		}
+	}
 
 
 	{

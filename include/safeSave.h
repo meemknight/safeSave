@@ -111,8 +111,20 @@ namespace sfs
 				string_type,
 				uint64_type,
 				int64_type,
-				keyValueData_type
+				keyValueData_type,
 
+				char_type,
+				uchar_type,
+				uint_type,
+				double_type,
+
+				vec2_type,
+				vec3_type,
+				vec4_type,
+
+				ivec2_type,
+				ivec3_type,
+				ivec4_type,
 			};
 
 			std::vector<char> data;
@@ -124,6 +136,27 @@ namespace sfs
 				std::int32_t intData;
 				float floatData;
 				bool boolData;
+				char charData;
+				unsigned char uCharData;
+				unsigned int uintData;
+				double doubleData;
+
+				struct Vec
+				{
+					float x;
+					float y;
+					float z;
+					float w;
+				}vec;
+
+				struct IVec
+				{
+					int x;
+					int y;
+					int z;
+					int w;
+				}ivec;
+
 			}primitives;
 
 			bool operator== (const Entry &other) const;
@@ -146,6 +179,21 @@ namespace sfs
 				data.assign(v.begin(), v.end());
 			}
 			Entry(const char *v): Entry(std::string(v)) {}
+
+			Entry(char c) { type = char_type; primitives.charData = c; }
+			Entry(unsigned char c) { type = uchar_type; primitives.uCharData = c; }
+			Entry(unsigned int i) { type = uint_type; primitives.uintData = i; }
+			Entry(double d) { type = double_type; primitives.doubleData = d; }
+
+
+			Entry(float x, float y) { type = vec2_type; primitives.vec = {}; primitives.vec.x = x; primitives.vec.y = y; }
+			Entry(float x, float y, float z) { type = vec3_type; primitives.vec = {}; primitives.vec.x = x; primitives.vec.y = y; primitives.vec.y = z; }
+			Entry(float x, float y, float z, float w) { type = vec4_type; primitives.vec = {}; primitives.vec.x = x; primitives.vec.y = y; primitives.vec.y = z; primitives.vec.w = w;}
+
+			Entry(int x, int y) { type = ivec2_type; primitives.ivec = {}; primitives.ivec.x = x; primitives.ivec.y = y; }
+			Entry(int x, int y, int z) { type = ivec3_type; primitives.ivec = {}; primitives.ivec.x = x; primitives.ivec.y = y; primitives.ivec.y = z; }
+			Entry(int x, int y, int z, int w) { type = ivec4_type; primitives.ivec = {}; primitives.ivec.x = x; primitives.ivec.y = y; primitives.ivec.y = z; primitives.ivec.w = w; }
+
 
 		};
 
@@ -197,6 +245,38 @@ namespace sfs
 		Errors setInt(std::string at, int32_t i);
 
 		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setChar(std::string at, char c);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setUCHar(std::string at, unsigned char c);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setUInt(std::string at, uint32_t u);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setDouble(std::string at, double d);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setVec2(std::string at, float x, float y);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setVec3(std::string at, float x, float y, float z);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setVec4(std::string at, float x, float y, float z, float w);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setIVec2(std::string at, int x, int y);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setIVec3(std::string at, int x, int y, int z);
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
+		Errors setIVec4(std::string at, int x, int y, int z, int w);
+
+
+
+		//can return error: warningEntryAlreadyExists, if so it will overwrite data
 		Errors setuInt64(std::string at, uint64_t i);
 
 		//won't change i if failed
@@ -213,6 +293,23 @@ namespace sfs
 		//won't change f if failed
 		//can return error: entryNotFound, entryHasDifferentDataType
 		Errors getFloat(std::string at, float &f);
+
+
+		//won't change c if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getChar(std::string at, char &c);
+
+		//won't change c if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getUChar(std::string at, unsigned char &c);
+
+		//won't change u if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getUInt(std::string at, unsigned int &u);
+
+		//won't change d if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getDobule(std::string at, double &d);
 
 		//can return error: warningEntryAlreadyExists, if so it will overwrite data
 		Errors setFloat(std::string at, float f);
