@@ -275,6 +275,30 @@ namespace sfs
 		Errors setIVec4(std::string at, int x, int y, int z, int w);
 
 
+		//won't change the variable if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getVec2(std::string at, float &x, float &y);
+
+		//won't change the variable if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getVec3(std::string at, float &x, float &y, float &z);
+
+		//won't change the variable if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getVec4(std::string at, float &x, float &y, float &z, float &w);
+
+		//won't change the variable if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getIVec2(std::string at, int &x, int &y);
+
+		//won't change the variable if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getIVec3(std::string at, int &x, int &y, int &z);
+
+		//won't change the variable if failed
+		//can return error: entryNotFound, entryHasDifferentDataType
+		Errors getIVec4(std::string at, int &x, int &y, int &z, int &w);
+
 
 		//can return error: warningEntryAlreadyExists, if so it will overwrite data
 		Errors setuInt64(std::string at, uint64_t i);

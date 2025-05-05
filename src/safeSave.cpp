@@ -955,6 +955,150 @@ namespace sfs
 		}
 	}
 
+	Errors SafeSafeKeyValueData::getVec2(std::string at, float &x, float &y)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::vec2_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				x = it->second.primitives.vec.x;
+				y = it->second.primitives.vec.y;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getVec3(std::string at, float &x, float &y, float &z)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::vec3_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				x = it->second.primitives.vec.x;
+				y = it->second.primitives.vec.y;
+				z = it->second.primitives.vec.z;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getVec4(std::string at, float &x, float &y, float &z, float &w)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::vec4_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				x = it->second.primitives.vec.x;
+				y = it->second.primitives.vec.y;
+				z = it->second.primitives.vec.z;
+				w = it->second.primitives.vec.w;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getIVec2(std::string at, int &x, int &y)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::ivec2_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				x = it->second.primitives.ivec.x;
+				y = it->second.primitives.ivec.y;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getIVec3(std::string at, int &x, int &y, int &z)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::ivec3_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				x = it->second.primitives.ivec.x;
+				y = it->second.primitives.ivec.y;
+				z = it->second.primitives.ivec.z;
+				return Errors::noError;
+			}
+		}
+	}
+
+	Errors SafeSafeKeyValueData::getIVec4(std::string at, int &x, int &y, int &z, int &w)
+	{
+		auto it = entries.find(at);
+
+		if (it == entries.end())
+		{
+			return Errors::entryNotFound;
+		}
+		else
+		{
+			if (it->second.type != Entry::Types::ivec4_type)
+			{
+				return Errors::entryHasDifferentDataType;
+			}
+			else
+			{
+				x = it->second.primitives.ivec.x;
+				y = it->second.primitives.ivec.y;
+				z = it->second.primitives.ivec.z;
+				w = it->second.primitives.ivec.w;
+				return Errors::noError;
+			}
+		}
+	}
+
 	Errors SafeSafeKeyValueData::setuInt64(std::string at, uint64_t i)
 	{
 		auto it = entries.find(at);
